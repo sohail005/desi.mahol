@@ -34,6 +34,7 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(functi
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YTPlayer | null>(null);
   const pendingVideoIdRef = useRef<string | null>(null);
+  const pendingAutoplayRef = useRef(false);
   const currentVideoIdRef = useRef<string | null>(null);
   const callbacksRef = useRef({ onReady, onEnded, onPlaying, onPaused, onError });
   callbacksRef.current = { onReady, onEnded, onPlaying, onPaused, onError };
@@ -55,7 +56,11 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(functi
         events: {
           onReady: () => {
             if (pendingVideoIdRef.current) {
-              playerRef.current?.cueVideoById(pendingVideoIdRef.current);
+              if (pendingAutoplayRef.current) {
+                playerRef.current?.loadVideoById(pendingVideoIdRef.current);
+              } else {
+                playerRef.current?.cueVideoById(pendingVideoIdRef.current);
+              }
               pendingVideoIdRef.current = null;
             }
             callbacksRef.current.onReady?.();
@@ -98,10 +103,12 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(functi
         playerRef.current.loadVideoById(videoId);
       } else {
         pendingVideoIdRef.current = videoId;
+        pendingAutoplayRef.current = true;
       }
     },
     cueVideoById(videoId: string) {
       currentVideoIdRef.current = videoId;
+      pendingAutoplayRef.current = false;
       if (playerRef.current) {
         playerRef.current.cueVideoById(videoId);
       } else {

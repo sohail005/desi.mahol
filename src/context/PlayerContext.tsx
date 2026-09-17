@@ -93,35 +93,39 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     [currentPlaylistSlug]
   );
 
-  const goToIndex = useCallback((nextQueue: Song[], index: number, autoplay: boolean) => {
-    if (nextQueue.length === 0) return;
-    const playableIdx = findPlayableIndex(nextQueue, index, 1);
-    setCurrentTime(0);
-    setDuration(0);
+  const goToIndex = useCallback(
+    (nextQueue: Song[], index: number, autoplay: boolean, direction: 1 | -1 = 1) => {
+      if (nextQueue.length === 0) return;
+      const playableIdx = findPlayableIndex(nextQueue, index, direction);
+      setCurrentTime(0);
+      setDuration(0);
 
-    if (playableIdx === -1) {
-      setQueueIndex(((index % nextQueue.length) + nextQueue.length) % nextQueue.length);
-      setCurrentSong(nextQueue[index] ?? nextQueue[0]);
-      setIsPlaying(false);
-      setPlaybackUnavailable(true);
-      return;
-    }
+      if (playableIdx === -1) {
+        setQueueIndex(((index % nextQueue.length) + nextQueue.length) % nextQueue.length);
+        setCurrentSong(nextQueue[index] ?? nextQueue[0]);
+        setIsPlaying(false);
+        setPlaybackUnavailable(true);
+        return;
+      }
 
-    setPlaybackUnavailable(false);
-    setQueueIndex(playableIdx);
-    const song = nextQueue[playableIdx];
-    setCurrentSong(song);
-    loadedVideoIdRef.current = song.youtubeId;
+      setPlaybackUnavailable(false);
+      setQueueIndex(playableIdx);
+      const song = nextQueue[playableIdx];
+      setCurrentSong(song);
+      loadedVideoIdRef.current = song.youtubeId;
 
-    if (autoplay) {
-      setIsLoading(true);
-      setIsPlaying(true);
-      playerHandleRef.current?.loadVideoById(song.youtubeId);
-    } else {
-      setIsPlaying(false);
-      playerHandleRef.current?.cueVideoById(song.youtubeId);
-    }
-  }, []);
+      if (autoplay) {
+        setIsLoading(true);
+        setIsPlaying(true);
+        playerHandleRef.current?.loadVideoById(song.youtubeId);
+      } else {
+        setIsPlaying(false);
+        playerHandleRef.current?.cueVideoById(song.youtubeId);
+      }
+    },
+    []
+  );
+
 
   const playSong = useCallback(
     (song: Song, options?: PlaySongOptions) => {
@@ -185,7 +189,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       setCurrentTime(0);
       return;
     }
-    goToIndex(queue, queueIndex - 1, true);
+    goToIndex(queue, queueIndex - 1, true, -1);
   }, [queue, queueIndex, currentTime, goToIndex]);
 
   const seek = useCallback((seconds: number) => {
@@ -224,21 +228,33 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       setHasTunedIn(savedTunedIn);
 
       const savedSongId = window.localStorage.getItem(STORAGE_KEYS.song);
-      if (!savedSongId) return;
-      const song = getSongById(savedSongId);
-      if (!song) return;
+      const song = savedSongId ? getSongById(savedSongId) : undefined;
 
-      const savedPlaylistSlug = window.localStorage.getItem(STORAGE_KEYS.playlist);
-      const savedPlaylist = savedPlaylistSlug ? getPlaylistBySlug(savedPlaylistSlug) : undefined;
-      const restoredQueue = savedPlaylist ? getSongsForPlaylist(savedPlaylist) : [song];
-      const idx = restoredQueue.findIndex((s) => s.id === song.id);
+      if (song) {
+        const savedPlaylistSlug = window.localStorage.getItem(STORAGE_KEYS.playlist);
+        const savedPlaylist = savedPlaylistSlug ? getPlaylistBySlug(savedPlaylistSlug) : undefined;
+        const restoredQueue = savedPlaylist ? getSongsForPlaylist(savedPlaylist) : [song];
+        const idx = restoredQueue.findIndex((s) => s.id === song.id);
 
-      setQueue(restoredQueue);
-      setQueueIndex(idx === -1 ? 0 : idx);
-      setCurrentPlaylistSlug(savedPlaylist?.slug ?? null);
-      setCurrentSong(song);
+        setQueue(restoredQueue);
+        setQueueIndex(idx === -1 ? 0 : idx);
+        setCurrentPlaylistSlug(savedPlaylist?.slug ?? null);
+        setCurrentSong(song);
+        return;
+      }
+
+      // Nothing saved (first-ever visit) — cue up the current rotation so
+      // the player bar shows up ready to go instead of a bare "tune in"
+      // prompt. Cueing doesn't need a user gesture; only playVideo() does,
+      // which the visible Play button provides.
+      const rotation = getCurrentRotation();
+      const rotationSongs = getSongsForPlaylist(rotation);
+      const startIndex = getRadioStartingPosition(rotationSongs.length);
+      setQueue(rotationSongs);
+      setCurrentPlaylistSlug(rotation.slug);
+      goToIndex(rotationSongs, startIndex, false);
     });
-  }, []);
+  }, [goToIndex]);
 
   // Persist preferences.
   useEffect(() => {

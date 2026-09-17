@@ -9,16 +9,18 @@ export const metadata: Metadata = {
 
 export default function SongsPage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
-      <div className="mb-8 border-b border-[var(--border)] pb-6">
-        <p className="font-[family-name:var(--font-devanagari)] text-3xl font-semibold text-[var(--foreground)] sm:text-4xl">
-          सारे गाने
-        </p>
-        <p className="mt-1 text-sm text-[var(--muted)]">All Songs</p>
-        <p className="mt-3 text-xs text-[var(--muted)]">{songs.length} records</p>
-      </div>
+    <div className="min-h-[70vh] bg-[#1c0704] px-4 py-12 sm:px-6 sm:py-16">
+      <div className="mx-auto max-w-4xl">
+        <div className="mb-8 border-b border-white/10 pb-6">
+          <p className="font-[family-name:var(--font-devanagari)] text-3xl font-semibold text-white sm:text-4xl">
+            सारे गाने
+          </p>
+          <p className="mt-1 text-sm text-white/50">All Songs</p>
+          <p className="mt-3 text-xs text-white/40">{songs.length} records</p>
+        </div>
 
-      <SongList songs={songs} showSearch emptyMessage="No songs have been added yet." />
+        <SongList songs={songs} showSearch emptyMessage="No songs have been added yet." />
+      </div>
     </div>
   );
 }

@@ -2,72 +2,89 @@
 
 import { Radio } from "lucide-react";
 import { useRadio } from "@/hooks/useRadio";
+import { isPlaceholderYoutubeId } from "@/lib/youtube";
 import PlayerControls from "@/components/player/PlayerControls";
 import PlayerProgress from "@/components/player/PlayerProgress";
 import PlayerVolume from "@/components/player/PlayerVolume";
 
 export default function RadioPlayer() {
-  const { currentSong, currentPlaylist, hasTunedIn, isLoading, playbackUnavailable } = useRadio();
+  const { currentSong, isPlaying, hasTunedIn, isLoading, playbackUnavailable, tuneIn } =
+    useRadio();
 
-  if (!hasTunedIn && !currentSong) return null;
+  if (!hasTunedIn && !currentSong) {
+    return (
+      <div className="absolute inset-x-3 top-1/2 z-20 -translate-y-1/2 sm:inset-x-6">
+        <button
+          type="button"
+          onClick={tuneIn}
+          className="mx-auto flex max-w-2xl w-full items-center justify-center gap-2 rounded-2xl bg-black/70 px-4 py-3 text-sm font-semibold text-white shadow-lg backdrop-blur-md transition hover:bg-black/80"
+        >
+          <Radio size={16} className="text-[var(--accent)]" />
+          Tap to Tune In
+        </button>
+      </div>
+    );
+  }
+
+  const hasThumbnail = currentSong && !isPlaceholderYoutubeId(currentSong.youtubeId);
 
   return (
     <div
       role="region"
       aria-label="Now playing"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border)] bg-[var(--background)]/97 backdrop-blur-sm"
+      className="absolute inset-x-3 top-1/2 z-20 -translate-y-1/2 sm:inset-x-6"
     >
-      <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-2.5 sm:px-6 sm:py-3">
-        <div className="flex items-center gap-3 sm:gap-6">
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            <span
-              className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] text-[var(--accent)] sm:flex"
-              aria-hidden="true"
-            >
+      <div className="mx-auto flex max-w-2xl items-center gap-3 rounded-2xl bg-black/70 px-4 py-2.5 shadow-lg backdrop-blur-md sm:gap-4 sm:px-5 sm:py-3">
+        <span
+          className={`relative h-11 w-11 shrink-0 overflow-hidden rounded-full border border-white/15 sm:h-12 sm:w-12 ${
+            isPlaying ? "animate-spin-slow" : ""
+          }`}
+          aria-hidden="true"
+        >
+          {hasThumbnail ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={`https://i.ytimg.com/vi/${currentSong!.youtubeId}/default.jpg`}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <span className="flex h-full w-full items-center justify-center bg-white/5 text-[var(--accent)]">
               <Radio size={16} />
             </span>
-            <div className="min-w-0">
-              <p className="text-[10px] font-semibold tracking-[0.18em] text-[var(--muted)] uppercase">
-                {isLoading ? "Tuning in…" : "Now Playing"}
+          )}
+        </span>
+
+        <div className="min-w-0 flex-1">
+          {currentSong ? (
+            <>
+              <p className="truncate text-sm font-semibold text-white sm:text-base">
+                {currentSong.titleEnglish}
               </p>
-              {currentSong ? (
-                <div className="min-w-0">
-                  <p className="truncate font-[family-name:var(--font-devanagari)] text-sm text-[var(--foreground)] sm:text-base">
-                    {currentSong.titleHindi}
-                  </p>
-                  <p className="truncate text-xs text-[var(--muted)] sm:text-sm">
-                    {currentSong.titleEnglish}
-                    {currentPlaylist ? ` · ${currentPlaylist.titleEnglish}` : ""}
-                  </p>
-                </div>
-              ) : (
-                <p className="text-sm text-[var(--muted)]">Nothing tuned in yet</p>
-              )}
-            </div>
-          </div>
-
-          <PlayerControls />
-
-          <div className="hidden flex-1 justify-end md:flex">
-            <PlayerVolume />
-          </div>
+              <p className="truncate text-xs text-white/50">
+                {isLoading ? "Tuning in…" : `Credits: ${currentSong.artist}`}
+              </p>
+              <div className="mt-1">
+                <PlayerProgress />
+              </div>
+            </>
+          ) : (
+            <p className="text-sm text-white/60">Nothing tuned in yet</p>
+          )}
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="flex-1">
-            <PlayerProgress />
-          </div>
-          <div className="md:hidden">
-            <PlayerVolume />
-          </div>
-        </div>
+        <PlayerControls />
 
-        {playbackUnavailable && (
-          <p className="text-xs text-[var(--accent)]">
-            This track isn&apos;t available yet — add a YouTube ID to hear it.
-          </p>
-        )}
+        <div className="hidden sm:block">
+          <PlayerVolume />
+        </div>
       </div>
+
+      {playbackUnavailable && (
+        <p className="mx-auto mt-2 max-w-2xl text-center text-xs text-amber-400">
+          This track isn&apos;t available yet — add a YouTube ID to hear it.
+        </p>
+      )}
     </div>
   );
 }

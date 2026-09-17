@@ -15,9 +15,9 @@ export default function PlayerControls() {
         onClick={previous}
         disabled={disabled}
         aria-label="Previous song"
-        className="flex h-11 w-11 items-center justify-center rounded-full text-[var(--foreground)] transition hover:bg-[var(--border)]/40 disabled:opacity-40 disabled:hover:bg-transparent"
+        className="flex h-9 w-9 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white disabled:opacity-40 disabled:hover:bg-transparent"
       >
-        <SkipBack size={18} fill="currentColor" />
+        <SkipBack size={16} fill="currentColor" />
       </button>
 
       <button
@@ -25,14 +25,14 @@ export default function PlayerControls() {
         onClick={togglePlay}
         disabled={disabled}
         aria-label={isPlaying ? "Pause" : "Play"}
-        className="flex h-12 w-12 items-center justify-center rounded-full border border-[var(--accent-dark)] bg-[var(--accent)] text-[var(--background)] shadow-sm transition hover:bg-[var(--accent-dark)] disabled:opacity-40 disabled:hover:bg-[var(--accent)]"
+        className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-sm transition hover:bg-[var(--accent-dark)] disabled:opacity-40 disabled:hover:bg-[var(--accent)]"
       >
         {isLoading ? (
-          <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--background)] border-t-transparent" />
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
         ) : isPlaying ? (
-          <Pause size={20} fill="currentColor" />
+          <Pause size={18} fill="currentColor" />
         ) : (
-          <Play size={20} fill="currentColor" className="ml-0.5" />
+          <Play size={18} fill="currentColor" className="ml-0.5" />
         )}
       </button>
 
@@ -41,9 +41,9 @@ export default function PlayerControls() {
         onClick={next}
         disabled={disabled}
         aria-label="Next song"
-        className="flex h-11 w-11 items-center justify-center rounded-full text-[var(--foreground)] transition hover:bg-[var(--border)]/40 disabled:opacity-40 disabled:hover:bg-transparent"
+        className="flex h-9 w-9 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white disabled:opacity-40 disabled:hover:bg-transparent"
       >
-        <SkipForward size={18} fill="currentColor" />
+        <SkipForward size={16} fill="currentColor" />
       </button>
     </div>
   );

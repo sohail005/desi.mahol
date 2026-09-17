@@ -14,7 +14,7 @@ export default function PlayerVolume() {
         type="button"
         onClick={toggleMute}
         aria-label={isMuted ? "Unmute" : "Mute"}
-        className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--muted)] transition hover:bg-[var(--border)]/40 hover:text-[var(--foreground)]"
+        className="flex h-9 w-9 items-center justify-center rounded-full text-white/70 transition hover:bg-white/10 hover:text-white"
       >
         <Icon size={17} />
       </button>
@@ -26,9 +26,9 @@ export default function PlayerVolume() {
         value={isMuted ? 0 : volume}
         onChange={(e) => setVolume(Number(e.target.value))}
         aria-label="Volume"
-        className="h-1 w-14 cursor-pointer appearance-none rounded-full bg-[var(--border)] accent-[var(--accent)] sm:w-20"
+        className="h-1 w-14 cursor-pointer appearance-none rounded-full bg-white/20 accent-[var(--accent)] sm:w-20"
         style={{
-          background: `linear-gradient(to right, var(--accent) ${isMuted ? 0 : volume}%, var(--border) ${isMuted ? 0 : volume}%)`,
+          background: `linear-gradient(to right, var(--accent) ${isMuted ? 0 : volume}%, rgba(255,255,255,0.2) ${isMuted ? 0 : volume}%)`,
         }}
       />
     </div>

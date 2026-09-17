@@ -4,7 +4,6 @@ import "./globals.css";
 import { PlayerProvider } from "@/context/PlayerContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import RadioPlayer from "@/components/player/RadioPlayer";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -52,9 +51,8 @@ export default function RootLayout({
       <body className="font-[family-name:var(--font-body)] antialiased">
         <PlayerProvider>
           <Header />
-          <main className="min-h-[70vh] pb-28">{children}</main>
+          <main className="min-h-[70vh]">{children}</main>
           <Footer />
-          <RadioPlayer />
         </PlayerProvider>
       </body>
     </html>

@@ -1,11 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { formatISTClock } from "@/lib/time";
+import { useOnlineCount } from "@/hooks/useOnlineCount";
 
 export default function Header() {
+  const pathname = usePathname();
   const [time, setTime] = useState<string | null>(null);
+  const onlineCount = useOnlineCount();
 
   useEffect(() => {
     function tick() {
@@ -19,43 +23,39 @@ export default function Header() {
     };
   }, []);
 
+  if (pathname === "/") return null;
+
   return (
-    <header className="border-b border-[var(--border)] bg-[var(--background)]">
+    <header className="border-b border-white/10 bg-[#1c0704]">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-        <div className="flex items-center gap-2 text-xs text-[var(--muted)]">
+        <div className="flex items-center gap-2 text-xs text-white/50">
           <span className="tabular-nums" suppressHydrationWarning>
             {time ?? "--:--"} IST
           </span>
-          <span className="flex items-center gap-1.5 rounded-full border border-[var(--border)] px-2 py-0.5">
+          <span className="flex items-center gap-1.5 rounded-full border border-white/10 px-2 py-0.5">
             <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--green)] opacity-60" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[var(--green)]" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
             </span>
-            online
+            {onlineCount ?? "…"} online
           </span>
         </div>
 
         <nav className="flex items-center gap-5 text-sm sm:gap-8">
           <Link
             href="/"
-            className="font-[family-name:var(--font-devanagari)] text-base font-semibold text-[var(--foreground)] sm:text-lg"
+            className="font-[family-name:var(--font-devanagari)] text-base font-semibold text-white sm:text-lg"
           >
             Desi Mahol
           </Link>
           <div className="flex items-center gap-4 sm:gap-6">
-            <Link
-              href="/playlists"
-              className="group relative text-[var(--foreground)] transition hover:text-[var(--accent)]"
-            >
+            <Link href="/playlists" className="group relative text-white/80 transition hover:text-amber-400">
               Playlists
-              <span className="absolute -bottom-1 left-0 h-px w-0 bg-[var(--accent)] transition-all duration-200 group-hover:w-full" />
+              <span className="absolute -bottom-1 left-0 h-px w-0 bg-amber-400 transition-all duration-200 group-hover:w-full" />
             </Link>
-            <Link
-              href="/songs"
-              className="group relative text-[var(--foreground)] transition hover:text-[var(--accent)]"
-            >
+            <Link href="/songs" className="group relative text-white/80 transition hover:text-amber-400">
               Songs
-              <span className="absolute -bottom-1 left-0 h-px w-0 bg-[var(--accent)] transition-all duration-200 group-hover:w-full" />
+              <span className="absolute -bottom-1 left-0 h-px w-0 bg-amber-400 transition-all duration-200 group-hover:w-full" />
             </Link>
           </div>
         </nav>

@@ -43,27 +43,27 @@ export default function SongList({
   return (
     <div>
       {showSearch && (
-        <div className="mb-6 flex items-center gap-2 border border-[var(--border)] bg-[var(--surface)]/40 px-3 py-2">
-          <Search size={16} className="text-[var(--muted)]" />
+        <div className="mb-6 flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+          <Search size={16} className="text-white/50" />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search songs..."
             aria-label="Search songs"
-            className="w-full bg-transparent text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none"
+            className="w-full bg-transparent text-sm text-white placeholder:text-white/40 focus:outline-none"
           />
         </div>
       )}
 
       {songs.length === 0 ? (
-        <p className="py-10 text-center text-sm text-[var(--muted)]">{emptyMessage}</p>
+        <p className="py-10 text-center text-sm text-white/50">{emptyMessage}</p>
       ) : filtered.length === 0 ? (
-        <p className="py-10 text-center text-sm text-[var(--muted)]">
+        <p className="py-10 text-center text-sm text-white/50">
           No songs match &ldquo;{query}&rdquo;.
         </p>
       ) : (
-        <ul className="border-t border-[var(--border)]">
+        <ul className="rounded-xl border border-white/10 bg-white/5">
           {filtered.map((song, index) => (
             <SongRow
               key={song.id}

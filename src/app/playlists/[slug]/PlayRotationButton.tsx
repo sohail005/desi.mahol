@@ -21,7 +21,7 @@ export default function PlayRotationButton({ playlist }: { playlist: Playlist })
     <button
       type="button"
       onClick={handleClick}
-      className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-dark)] bg-[var(--accent)] px-6 py-2.5 text-sm font-semibold tracking-wide text-[var(--background)] uppercase shadow-sm transition hover:bg-[var(--accent-dark)]"
+      className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-dark)] bg-[var(--accent)] px-6 py-2.5 text-sm font-semibold tracking-wide text-white uppercase shadow-sm transition hover:bg-[var(--accent-dark)]"
     >
       {isThisPlaying ? (
         <Pause size={15} fill="currentColor" />
