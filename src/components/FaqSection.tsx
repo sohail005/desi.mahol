@@ -37,14 +37,14 @@ export default function FaqSection() {
           FAQ
         </p>
         <h2 className="mb-10 text-center font-[family-name:var(--font-devanagari)] text-3xl text-white sm:text-4xl">
-          देसी माहौल, समझाया गया
+          Desi Mahol, Explained
         </h2>
 
         <div className="space-y-3">
           {faqs.map((faq, index) => (
             <details
               key={faq.question}
-              className="faq-item rounded-xl border border-white/10 bg-white/5 p-4 sm:p-5"
+              className="faq-item liquid-glass-card rounded-xl p-4 sm:p-5"
               open={index === 0}
             >
               <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium text-white sm:text-base">

@@ -15,10 +15,10 @@ export default function RotationSection() {
       <div className="mx-auto max-w-5xl">
         <Link
           href={`/playlists/${onAir.slug}`}
-          className="group flex flex-col gap-4 rounded-2xl border border-emerald-500/30 bg-white/5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8"
+          className="liquid-glass-card group flex flex-col gap-4 rounded-2xl border-emerald-500/30 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8"
         >
           <div className="flex items-center gap-4">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
+            <span className="liquid-glass flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-emerald-500/30 text-emerald-400">
               <Radio size={20} />
             </span>
             <div>
@@ -29,11 +29,11 @@ export default function RotationSection() {
                 </span>
                 On Air Now
               </p>
-              <p className="mt-1 font-[family-name:var(--font-devanagari)] text-2xl font-semibold text-white sm:text-3xl">
-                {onAir.titleHindi}
+              <p className="mt-1 text-2xl font-semibold text-white sm:text-3xl">
+                {onAir.titleEnglish}
               </p>
               <p className="text-sm text-white/50">
-                {onAir.titleEnglish} · {formatRotationHours(onAir.startHour, onAir.endHour)}
+                {formatRotationHours(onAir.startHour, onAir.endHour)}
               </p>
             </div>
           </div>
@@ -46,9 +46,7 @@ export default function RotationSection() {
 
         <div className="mt-14 mb-6 flex items-end justify-between sm:mt-16">
           <div>
-            <p className="font-[family-name:var(--font-devanagari)] text-2xl font-semibold text-white">
-              रोटेशन
-            </p>
+            <p className="text-2xl font-semibold text-white">Rotations</p>
             <p className="text-sm text-white/50">The day&apos;s rotations</p>
           </div>
         </div>
@@ -64,17 +62,16 @@ export default function RotationSection() {
 
           <Link
             href="/songs"
-            className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-dashed border-white/15 bg-transparent p-5 transition hover:-translate-y-1 hover:border-amber-500/40 hover:shadow-lg sm:p-6"
+            className="liquid-glass-card group relative flex flex-col justify-between overflow-hidden rounded-2xl border-dashed border-white/15 p-5 transition hover:-translate-y-1 hover:border-amber-500/40 hover:shadow-lg sm:p-6"
           >
-            <span className="flex h-10 w-10 items-center justify-center rounded-full border border-amber-500/30 bg-amber-500/15">
+            <span className="liquid-glass flex h-10 w-10 items-center justify-center rounded-full border-amber-500/30">
               <ListMusic size={18} className="text-amber-400" />
             </span>
 
             <div className="mt-5">
-              <p className="font-[family-name:var(--font-devanagari)] text-2xl font-semibold text-white transition group-hover:text-amber-400">
-                सारे गाने
+              <p className="text-2xl font-semibold text-white transition group-hover:text-amber-400">
+                All Songs
               </p>
-              <p className="text-sm text-white/50">All Songs</p>
             </div>
             <p className="mt-3 text-sm leading-relaxed text-white/70">
               Browse the entire Desi Mahol record collection and play anything, any time.

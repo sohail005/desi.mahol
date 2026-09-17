@@ -18,7 +18,7 @@ export default function SongRow({ song, index, isActive, isPlaying, onPlay }: So
         type="button"
         onClick={() => onPlay(song)}
         aria-current={isActive ? "true" : undefined}
-        className={`group grid w-full grid-cols-[2.5rem_1fr] items-center gap-3 py-3 text-left transition hover:bg-white/10 sm:grid-cols-[3rem_1fr_14rem_4rem] sm:gap-4 sm:px-3 ${
+        className={`group grid w-full grid-cols-[2.5rem_1fr] items-center gap-3 px-2 py-3 text-left transition hover:bg-white/10 sm:grid-cols-[3rem_1fr_14rem_4rem] sm:gap-4 sm:px-3 ${
           isActive ? "bg-white/10" : ""
         }`}
       >
@@ -40,18 +40,18 @@ export default function SongRow({ song, index, isActive, isPlaying, onPlay }: So
 
         <span className="min-w-0">
           <span
-            className={`block font-[family-name:var(--font-devanagari)] text-base leading-snug ${
+            className={`block truncate text-base font-semibold leading-snug ${
               isActive ? "text-amber-400" : "text-white"
             }`}
           >
-            {song.titleHindi}
+            {song.titleEnglish}
           </span>
           <span className="block truncate text-sm text-white/50">
-            {song.titleEnglish} · {song.movie}
+            {song.movie} · {song.artist}
           </span>
         </span>
 
-        <span className="col-span-2 mt-1 truncate text-sm text-white/50 sm:col-span-1 sm:mt-0 sm:pl-1">
+        <span className="hidden truncate text-sm text-white/50 sm:block sm:pl-1">
           {song.artist}
         </span>
 

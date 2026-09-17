@@ -23,17 +23,17 @@ export default function PlaylistCard({ playlist, isOnAir }: PlaylistCardProps) {
   return (
     <Link
       href={`/playlists/${playlist.slug}`}
-      className={`group relative block overflow-hidden rounded-2xl border bg-white/5 p-5 transition hover:-translate-y-1 hover:shadow-lg sm:p-6 ${
-        isOnAir ? "border-emerald-500/40" : "border-white/10 hover:border-amber-500/40"
+      className={`liquid-glass-card group relative block overflow-hidden rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-lg sm:p-6 ${
+        isOnAir ? "border-emerald-500/40" : "hover:border-amber-500/40"
       }`}
     >
       <div className="flex items-start justify-between gap-2">
-        <span className="flex h-10 w-10 items-center justify-center rounded-full border border-amber-500/30 bg-amber-500/15">
+        <span className="liquid-glass flex h-10 w-10 items-center justify-center rounded-full border-amber-500/30">
           <Icon size={18} className="text-amber-400" />
         </span>
 
         {isOnAir ? (
-          <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-400">
+          <span className="liquid-glass flex items-center gap-1.5 rounded-full border-emerald-500/30 px-2.5 py-1 text-xs font-semibold text-emerald-400">
             <span className="relative flex h-1.5 w-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
@@ -41,16 +41,15 @@ export default function PlaylistCard({ playlist, isOnAir }: PlaylistCardProps) {
             On Air
           </span>
         ) : (
-          <span className="rounded-full border border-white/10 px-2.5 py-1 text-xs text-white/50">
+          <span className="liquid-glass rounded-full px-2.5 py-1 text-xs text-white/70">
             {formatRotationHours(playlist.startHour, playlist.endHour)}
           </span>
         )}
       </div>
 
-      <p className="mt-5 font-[family-name:var(--font-devanagari)] text-2xl font-semibold text-white transition group-hover:text-amber-400">
-        {playlist.titleHindi}
+      <p className="mt-5 text-2xl font-semibold text-white transition group-hover:text-amber-400">
+        {playlist.titleEnglish}
       </p>
-      <p className="text-sm text-white/50">{playlist.titleEnglish}</p>
 
       <p className="mt-3 text-sm leading-relaxed text-white/70">{playlist.description}</p>
 

@@ -17,9 +17,7 @@ export default function PlaylistsPage() {
     <div className="min-h-[70vh] bg-[#1c0704] px-4 py-12 sm:px-6 sm:py-16">
       <div className="mx-auto max-w-3xl">
         <div className="mb-8 border-b border-white/10 pb-6">
-          <p className="font-[family-name:var(--font-devanagari)] text-3xl font-semibold text-white sm:text-4xl">
-            रोटेशन
-          </p>
+          <p className="text-3xl font-semibold text-white sm:text-4xl">Rotations</p>
           <p className="mt-1 text-sm text-white/50">Playlists</p>
         </div>
 
@@ -31,8 +29,8 @@ export default function PlaylistsPage() {
               <li key={playlist.id}>
                 <Link
                   href={`/playlists/${playlist.slug}`}
-                  className={`group flex flex-col gap-2 rounded-2xl border p-5 transition hover:-translate-y-0.5 hover:shadow-lg sm:p-6 ${
-                    isOnAir ? "border-emerald-500/40 bg-white/5" : "border-white/10 bg-white/5 hover:border-amber-500/40"
+                  className={`liquid-glass-card group flex flex-col gap-2 rounded-2xl p-5 transition hover:-translate-y-0.5 hover:shadow-lg sm:p-6 ${
+                    isOnAir ? "border-emerald-500/40" : "hover:border-amber-500/40"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2 text-xs text-white/50">
@@ -49,10 +47,9 @@ export default function PlaylistsPage() {
                       </span>
                     )}
                   </div>
-                  <p className="font-[family-name:var(--font-devanagari)] text-2xl font-semibold text-white transition group-hover:text-amber-400">
-                    {playlist.titleHindi}
+                  <p className="text-2xl font-semibold text-white transition group-hover:text-amber-400">
+                    {playlist.titleEnglish}
                   </p>
-                  <p className="text-sm text-white/50">{playlist.titleEnglish}</p>
                   <p className="text-sm leading-relaxed text-white/70">{playlist.description}</p>
                 </Link>
               </li>

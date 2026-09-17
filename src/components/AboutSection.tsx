@@ -3,21 +3,18 @@ import { Clock, Infinity as InfinityIcon, Radio } from "lucide-react";
 const features = [
   {
     icon: Radio,
-    titleHindi: "पुराने गाने",
     title: "Timeless Hindi Radio",
     description:
       "A curated stream of old, evergreen Hindi songs that never really left our playlists — tuned to keep playing in the background all day.",
   },
   {
     icon: Clock,
-    titleHindi: "रोज़ की रोटेशन",
     title: "Daily Rotations",
     description:
       "A different mood for every part of the day — mornings, afternoons, evenings and late night — each with its own running rotation.",
   },
   {
     icon: InfinityIcon,
-    titleHindi: "हमेशा खुला",
     title: "Always Open",
     description:
       "Desi Mahol is free, streams straight from your browser, and never closes — no sign-up, no app.",
@@ -35,7 +32,7 @@ export default function AboutSection() {
           Welcome to
         </p>
         <h2 className="font-[family-name:var(--font-devanagari)] text-3xl text-white sm:text-5xl">
-          देसी माहौल — पुराने गानों का माहौल
+          Desi Mahol — the Mood of Old Songs
         </h2>
         <p className="mt-6 text-sm leading-relaxed text-white/70 sm:text-base">
           Desi Mahol is a free ambient Hindi radio built to recreate one very specific
@@ -50,10 +47,10 @@ export default function AboutSection() {
         {features.map((feature) => (
           <div
             key={feature.title}
-            className="rounded-2xl border border-white/10 bg-white/5 p-6 text-left"
+            className="liquid-glass-card rounded-2xl p-6 text-left"
           >
             <div
-              className="mb-4 flex h-10 w-10 items-center justify-center rounded-full border border-amber-500/30 bg-amber-500/15"
+              className="liquid-glass mb-4 flex h-10 w-10 items-center justify-center rounded-full border-amber-500/30"
               aria-hidden="true"
             >
               <feature.icon className="h-5 w-5 text-amber-400" />

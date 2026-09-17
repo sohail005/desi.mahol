@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { formatISTClock } from "@/lib/time";
 import { useOnlineCount } from "@/hooks/useOnlineCount";
+import InstallAppButton from "@/components/InstallAppButton";
 
 export default function Header() {
   const pathname = usePathname();
@@ -32,7 +33,7 @@ export default function Header() {
           <span className="tabular-nums" suppressHydrationWarning>
             {time ?? "--:--"} IST
           </span>
-          <span className="flex items-center gap-1.5 rounded-full border border-white/10 px-2 py-0.5">
+          <span className="liquid-glass flex items-center gap-1.5 rounded-full px-2 py-0.5">
             <span className="relative flex h-1.5 w-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
@@ -57,6 +58,10 @@ export default function Header() {
               Songs
               <span className="absolute -bottom-1 left-0 h-px w-0 bg-amber-400 transition-all duration-200 group-hover:w-full" />
             </Link>
+            <InstallAppButton
+              iconSize={14}
+              className="liquid-glass flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-white"
+            />
           </div>
         </nav>
       </div>

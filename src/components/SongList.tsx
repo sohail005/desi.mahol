@@ -43,7 +43,7 @@ export default function SongList({
   return (
     <div>
       {showSearch && (
-        <div className="mb-6 flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+        <div className="liquid-glass-card mb-6 flex items-center gap-2 rounded-xl px-3 py-2">
           <Search size={16} className="text-white/50" />
           <input
             type="search"
@@ -63,7 +63,7 @@ export default function SongList({
           No songs match &ldquo;{query}&rdquo;.
         </p>
       ) : (
-        <ul className="rounded-xl border border-white/10 bg-white/5">
+        <ul className="liquid-glass-card rounded-xl">
           {filtered.map((song, index) => (
             <SongRow
               key={song.id}

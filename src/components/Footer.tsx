@@ -2,7 +2,7 @@ export default function Footer() {
   return (
     <footer className="border-t border-white/5 bg-[#0d0503] px-5 py-8 text-center sm:px-8">
       <p className="font-[family-name:var(--font-devanagari)] mb-1 text-lg text-amber-200/80">
-        देसी माहौल
+        Desi Mahol
       </p>
       <p className="text-xs text-white/40">Desi Mahol · playing all day</p>
 
@@ -20,9 +20,9 @@ export default function Footer() {
           <span>Join Group</span>
         </a>
         <a
-          href="#"
+          href="https://www.instagram.com/sohail.code/"
           target="_blank"
-          rel="noopener"
+          rel="noopener noreferrer"
           aria-label="Desi Mahol on Instagram"
           className="flex h-9 items-center justify-center gap-2 rounded-lg border border-[#E1306C]/40 bg-[#E1306C]/15 px-3.5 text-xs font-semibold tracking-wide text-[#E1306C] shadow-sm transition-all hover:border-[#E1306C] hover:bg-[#E1306C]/25 hover:text-pink-300 active:scale-95"
         >

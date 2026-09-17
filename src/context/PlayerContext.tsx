@@ -73,6 +73,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const loadedVideoIdRef = useRef<string | null>(null);
   const skipAttemptsRef = useRef(0);
   const hasRestoredRef = useRef(false);
+  const tabIdRef = useRef<string | null>(null);
+  const playbackChannelRef = useRef<BroadcastChannel | null>(null);
+  if (tabIdRef.current === null && typeof crypto !== "undefined") {
+    tabIdRef.current = crypto.randomUUID();
+  }
 
   const [queue, setQueue] = useState<Song[]>([]);
   const [queueIndex, setQueueIndex] = useState(0);
@@ -256,6 +261,27 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     });
   }, [goToIndex]);
 
+  // Only one browser tab should play audio at a time. When this tab starts
+  // playing, tell other tabs of the same site to pause — but don't pause
+  // ourselves just because the tab is backgrounded/unfocused.
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof BroadcastChannel === "undefined") return;
+
+    const channel = new BroadcastChannel("desi-mahol-player");
+    playbackChannelRef.current = channel;
+
+    channel.onmessage = (event) => {
+      if (event.data?.type === "playing" && event.data.tabId !== tabIdRef.current) {
+        pause();
+      }
+    };
+
+    return () => {
+      channel.close();
+      playbackChannelRef.current = null;
+    };
+  }, [pause]);
+
   // Persist preferences.
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -324,6 +350,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
     setPlaybackUnavailable(false);
     skipAttemptsRef.current = 0;
+    playbackChannelRef.current?.postMessage({ type: "playing", tabId: tabIdRef.current });
   }, []);
 
   const handlePaused = useCallback(() => {

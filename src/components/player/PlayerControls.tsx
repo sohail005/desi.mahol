@@ -25,7 +25,7 @@ export default function PlayerControls() {
         onClick={togglePlay}
         disabled={disabled}
         aria-label={isPlaying ? "Pause" : "Play"}
-        className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-sm transition hover:bg-[var(--accent-dark)] disabled:opacity-40 disabled:hover:bg-[var(--accent)]"
+        className="liquid-glass liquid-glass-accent flex h-10 w-10 items-center justify-center rounded-full text-white disabled:opacity-40"
       >
         {isLoading ? (
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />

@@ -46,8 +46,8 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(functi
       if (cancelled || !containerRef.current) return;
 
       playerRef.current = new YT.Player(containerRef.current, {
-        height: "1",
-        width: "1",
+        height: "200",
+        width: "200",
         playerVars: {
           playsinline: 1,
           controls: 0,
@@ -135,9 +135,14 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(functi
     },
   }));
 
-  return <div className="pointer-events-none fixed bottom-0 left-0 h-px w-px overflow-hidden opacity-0" aria-hidden="true">
-    <div ref={containerRef} />
-  </div>;
+  return (
+    <div
+      className="pointer-events-none fixed top-0 left-[-9999px] h-50 w-50 opacity-0"
+      aria-hidden="true"
+    >
+      <div ref={containerRef} />
+    </div>
+  );
 });
 
 export default YouTubePlayer;

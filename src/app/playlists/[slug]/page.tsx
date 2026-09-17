@@ -43,14 +43,13 @@ export default async function PlaylistDetailPage({
   return (
     <div className="min-h-[70vh] bg-[#1c0704] px-4 py-12 sm:px-6 sm:py-16">
       <div className="mx-auto max-w-4xl">
-        <div className="mb-8 rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8">
+        <div className="liquid-glass-card mb-8 rounded-2xl p-6 sm:p-8">
           <p className="text-xs text-white/50">
             {formatRotationHours(playlist.startHour, playlist.endHour)} · {songs.length} songs
           </p>
-          <p className="mt-2 font-[family-name:var(--font-devanagari)] text-3xl font-semibold text-white sm:text-4xl">
-            {playlist.titleHindi}
+          <p className="mt-2 text-3xl font-semibold text-white sm:text-4xl">
+            {playlist.titleEnglish}
           </p>
-          <p className="mt-1 text-lg text-white/50">{playlist.titleEnglish}</p>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70">
             {playlist.description}
           </p>

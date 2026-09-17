@@ -13,13 +13,13 @@ export default function RadioPlayer() {
 
   if (!hasTunedIn && !currentSong) {
     return (
-      <div className="absolute inset-x-3 top-1/2 z-20 -translate-y-1/2 sm:inset-x-6">
+      <div className="absolute inset-x-3 bottom-3 z-20 sm:inset-x-6 sm:bottom-6">
         <button
           type="button"
           onClick={tuneIn}
-          className="mx-auto flex max-w-2xl w-full items-center justify-center gap-2 rounded-2xl bg-black/70 px-4 py-3 text-sm font-semibold text-white shadow-lg backdrop-blur-md transition hover:bg-black/80"
+          className="liquid-glass-card mx-auto flex w-full max-w-2xl items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-white shadow-lg transition"
         >
-          <Radio size={16} className="text-[var(--accent)]" />
+          <Radio size={16} className="text-accent" />
           Tap to Tune In
         </button>
       </div>
@@ -32,9 +32,9 @@ export default function RadioPlayer() {
     <div
       role="region"
       aria-label="Now playing"
-      className="absolute inset-x-3 top-1/2 z-20 -translate-y-1/2 sm:inset-x-6"
+      className="absolute inset-x-3 bottom-3 z-20 sm:inset-x-6 sm:bottom-6"
     >
-      <div className="mx-auto flex max-w-2xl items-center gap-3 rounded-2xl bg-black/70 px-4 py-2.5 shadow-lg backdrop-blur-md sm:gap-4 sm:px-5 sm:py-3">
+      <div className="liquid-glass-card mx-auto flex max-w-2xl items-center gap-3 rounded-2xl px-4 py-2.5 shadow-lg sm:gap-4 sm:px-5 sm:py-3">
         <span
           className={`relative h-11 w-11 shrink-0 overflow-hidden rounded-full border border-white/15 sm:h-12 sm:w-12 ${
             isPlaying ? "animate-spin-slow" : ""
