@@ -20,7 +20,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (loading || !user || !isAdmin) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#1c0704] text-white/60">
+      <div className="flex min-h-screen items-center justify-center bg-transparent text-white/60">
         Loading…
       </div>
     );

@@ -39,46 +39,47 @@ export default function AdminLoginPage() {
 
   if (loading || (user && isAdmin)) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#1c0704] text-white/60">
+      <div className="flex min-h-screen items-center justify-center bg-transparent text-white/60">
         Loading…
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#1c0704] px-4">
+    <div className="flex min-h-screen items-center justify-center bg-transparent px-4 py-10 sm:px-6">
       <form
         onSubmit={handleSubmit}
-        className="liquid-glass-card w-full max-w-sm rounded-2xl p-6 text-white"
+        className="liquid-glass-card w-full max-w-sm rounded-2xl p-5 text-white sm:p-6"
       >
-        <div className="mb-5 flex items-center gap-2">
-          <span className="liquid-glass flex h-9 w-9 items-center justify-center rounded-full text-accent">
-            <Lock size={16} />
+        <div className="mb-6 flex items-center gap-2.5">
+          <span className="liquid-glass flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-accent">
+            <Lock size={17} />
           </span>
-          <h1 className="text-lg font-semibold">Admin Login</h1>
+          <h1 className="text-lg font-semibold sm:text-xl">Admin Login</h1>
         </div>
 
-        <label className="mb-3 block text-sm">
-          <span className="mb-1 block text-white/60">Email</span>
+        <label className="mb-4 block text-sm">
+          <span className="mb-1.5 block text-white/60">Email</span>
           <input
             type="email"
             required
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             autoComplete="email"
-            className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-white outline-none focus:border-amber-400/60"
+            inputMode="email"
+            className="w-full rounded-xl border border-white/15 bg-black/30 px-3.5 py-3 text-base text-white outline-none focus:border-amber-400/60 sm:py-2.5 sm:text-sm"
           />
         </label>
 
-        <label className="mb-4 block text-sm">
-          <span className="mb-1 block text-white/60">Password</span>
+        <label className="mb-5 block text-sm">
+          <span className="mb-1.5 block text-white/60">Password</span>
           <input
             type="password"
             required
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             autoComplete="current-password"
-            className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-white outline-none focus:border-amber-400/60"
+            className="w-full rounded-xl border border-white/15 bg-black/30 px-3.5 py-3 text-base text-white outline-none focus:border-amber-400/60 sm:py-2.5 sm:text-sm"
           />
         </label>
 
@@ -87,7 +88,7 @@ export default function AdminLoginPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="liquid-glass liquid-glass-accent w-full rounded-xl py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+          className="liquid-glass liquid-glass-accent w-full rounded-xl py-3 text-sm font-semibold text-white disabled:opacity-60 sm:py-2.5"
         >
           {isSubmitting ? "Signing in…" : "Sign in"}
         </button>

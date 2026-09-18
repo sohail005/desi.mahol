@@ -81,7 +81,7 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1c0704] px-4 py-8 text-white sm:px-8">
+    <div className="min-h-screen bg-transparent px-4 py-8 text-white sm:px-8">
       <div className="mx-auto max-w-3xl">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold">Desi Mahol Admin</h1>
