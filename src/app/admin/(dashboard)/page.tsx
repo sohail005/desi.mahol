@@ -67,7 +67,7 @@ export default function AdminDashboardPage() {
 
   async function handleDeleteSong(song: Song) {
     try {
-      await deleteSongRequest(song.id, song.storagePath);
+      await deleteSongRequest(song.id, song.audioPath);
       setSongs((prev) => prev.filter((s) => s.id !== song.id));
       showToast(`"${song.title}" deleted.`, "success");
     } catch {
@@ -98,11 +98,6 @@ export default function AdminDashboardPage() {
         <div className="mb-6">
           <UploadForm
             categories={categories}
-            onCategoryCreated={(category) =>
-              setCategories((prev) =>
-                [...prev, category].sort((a, b) => a.name.localeCompare(b.name))
-              )
-            }
             onUploaded={handleUploaded}
             onToast={showToast}
             createCategory={handleCreateCategory}

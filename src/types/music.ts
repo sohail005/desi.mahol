@@ -10,8 +10,8 @@ export interface Song {
   artist: string | null;
   categoryId: string;
   categoryName: string;
-  storagePath: string;
-  audioUrl: string;
+  /** Realtime Database path holding the base64-encoded audio (see src/lib/firebase/songs.ts). */
+  audioPath: string;
   duration: number | null;
   createdAt: number; // epoch ms
   createdBy: string;

@@ -8,7 +8,6 @@ import CategoryManager from "@/components/admin/CategoryManager";
 
 interface UploadFormProps {
   categories: Category[];
-  onCategoryCreated: (category: Category) => void;
   onUploaded: (song: Song) => void;
   onToast: (message: string, kind: "success" | "error") => void;
   createCategory: (name: string) => Promise<Category>;
@@ -16,7 +15,6 @@ interface UploadFormProps {
 
 export default function UploadForm({
   categories,
-  onCategoryCreated,
   onUploaded,
   onToast,
   createCategory,
@@ -37,7 +35,7 @@ export default function UploadForm({
       return;
     }
     if (candidate.size > MAX_UPLOAD_BYTES) {
-      setError("File is too large (max 15MB).");
+      setError(`File is too large (max ${Math.round(MAX_UPLOAD_BYTES / (1024 * 1024))}MB).`);
       return;
     }
     setError(null);
@@ -47,7 +45,6 @@ export default function UploadForm({
 
   async function handleCreateCategory(name: string) {
     const category = await createCategory(name);
-    onCategoryCreated(category);
     setCategoryId(category.id);
   }
 

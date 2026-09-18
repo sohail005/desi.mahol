@@ -12,17 +12,15 @@ import {
   Timestamp,
   where,
 } from "firebase/firestore";
-import {
-  deleteObject,
-  getDownloadURL,
-  ref,
-  uploadBytesResumable,
-  type UploadTaskSnapshot,
-} from "firebase/storage";
-import { auth, db, storage } from "@/lib/firebase/config";
+import { get, ref as dbRef, remove as dbRemove, set as dbSet } from "firebase/database";
+import { auth, db, rtdb } from "@/lib/firebase/config";
 import type { Category, Song } from "@/types/music";
 
-export const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
+// Realtime Database has no per-document size cap like Firestore, but a
+// single JSON value should still stay well clear of its request-size
+// limits — 10MB raw (~13.5MB once base64-encoded) comfortably fits a
+// compressed 3-5 minute song while staying safely inside those limits.
+export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
 export function slugify(name: string): string {
   return name
@@ -74,8 +72,7 @@ function mapSongDoc(id: string, data: Record<string, unknown>): Song {
     artist: typeof data.artist === "string" ? data.artist : null,
     categoryId: String(data.categoryId ?? ""),
     categoryName: String(data.categoryName ?? ""),
-    storagePath: String(data.storagePath ?? ""),
-    audioUrl: String(data.audioUrl ?? ""),
+    audioPath: String(data.audioPath ?? ""),
     duration: typeof data.duration === "number" ? data.duration : null,
     createdAt: toEpochMs(data.createdAt),
     createdBy: String(data.createdBy ?? ""),
@@ -94,6 +91,18 @@ export async function fetchAllSongsOnce(): Promise<Song[]> {
   return snapshot.docs.map((docSnap) => mapSongDoc(docSnap.id, docSnap.data()));
 }
 
+/**
+ * Resolves a song's `audioPath` to a playable data: URI. Fetches the
+ * base64 payload from Realtime Database lazily — only when a song is
+ * actually about to play, not when listing/browsing songs.
+ */
+export async function fetchSongAudio(audioPath: string): Promise<string> {
+  const snapshot = await get(dbRef(rtdb, audioPath));
+  const value = snapshot.val() as { data?: string; contentType?: string } | null;
+  if (!value?.data) throw new Error("This song's audio file is missing.");
+  return `data:${value.contentType || "audio/mpeg"};base64,${value.data}`;
+}
+
 /** Reads an audio file's duration in seconds by loading it into a throwaway <audio> element. */
 function readAudioDuration(file: File): Promise<number | null> {
   return new Promise((resolve) => {
@@ -110,6 +119,19 @@ function readAudioDuration(file: File): Promise<number | null> {
       resolve(null);
     });
     audio.src = objectUrl;
+  });
+}
+
+/** Reads a File into just its base64 payload (no "data:...;base64," prefix). */
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      resolve(result.slice(result.indexOf(",") + 1));
+    };
+    reader.onerror = () => reject(reader.error ?? new Error("Failed to read file."));
+    reader.readAsDataURL(file);
   });
 }
 
@@ -137,7 +159,7 @@ export async function uploadSong({
     throw new Error("File must be an audio file (MP3).");
   }
   if (file.size > MAX_UPLOAD_BYTES) {
-    throw new Error("File is too large (max 15MB).");
+    throw new Error(`File is too large (max ${Math.round(MAX_UPLOAD_BYTES / (1024 * 1024))}MB).`);
   }
   const trimmedTitle = title.trim();
   if (!trimmedTitle) throw new Error("Song title cannot be empty.");
@@ -145,54 +167,44 @@ export async function uploadSong({
 
   const songRef = doc(collection(db, "songs"));
   const songId = songRef.id;
-  const storagePath = `songs/${categoryId}/${songId}.mp3`;
-  const storageRef = ref(storage, storagePath);
+  const audioPath = `songsAudio/${songId}`;
 
+  onProgress?.(10);
   const duration = await readAudioDuration(file);
+  onProgress?.(30);
+  const base64Data = await fileToBase64(file);
+  onProgress?.(60);
 
-  const uploadTask = uploadBytesResumable(storageRef, file, { contentType: file.type });
-
-  await new Promise<void>((resolve, reject) => {
-    uploadTask.on(
-      "state_changed",
-      (snapshot: UploadTaskSnapshot) => {
-        if (onProgress && snapshot.totalBytes > 0) {
-          onProgress(Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100));
-        }
-      },
-      reject,
-      () => resolve()
-    );
-  });
+  await dbSet(dbRef(rtdb, audioPath), { data: base64Data, contentType: file.type });
+  onProgress?.(90);
 
   try {
-    const audioUrl = await getDownloadURL(uploadTask.snapshot.ref);
     const song: Omit<Song, "createdAt"> & { createdAt: unknown } = {
       id: songId,
       title: trimmedTitle,
       artist: artist?.trim() || null,
       categoryId,
       categoryName,
-      storagePath,
-      audioUrl,
+      audioPath,
       duration,
       createdAt: serverTimestamp(),
       createdBy: currentUser.email,
     };
     await setDoc(songRef, song);
+    onProgress?.(100);
     return { ...song, createdAt: Date.now() };
   } catch (error) {
-    // Firestore write failed after the file made it to Storage — clean up
-    // the orphaned file rather than leaving unreferenced storage around.
-    await deleteObject(storageRef).catch(() => {});
+    // Firestore write failed after the audio made it to Realtime Database
+    // — clean up the orphaned entry rather than leaving it unreferenced.
+    await dbRemove(dbRef(rtdb, audioPath)).catch(() => {});
     throw error;
   }
 }
 
-export async function deleteSong(songId: string, storagePath: string): Promise<void> {
+export async function deleteSong(songId: string, audioPath: string): Promise<void> {
   await deleteDoc(doc(db, "songs", songId));
-  await deleteObject(ref(storage, storagePath)).catch(() => {
-    // File already gone / never finished uploading — the metadata delete
+  await dbRemove(dbRef(rtdb, audioPath)).catch(() => {
+    // Entry already gone / never finished uploading — the metadata delete
     // above is what matters for the app; ignore.
   });
 }

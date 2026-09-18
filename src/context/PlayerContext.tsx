@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import type { Song } from "@/types/music";
-import { fetchSongsByCategory } from "@/lib/firebase/songs";
+import { fetchSongAudio, fetchSongsByCategory } from "@/lib/firebase/songs";
 import { getCurrentCategoryId, getRadioStartingPosition } from "@/lib/rotation";
 import NativeAudioPlayer, {
   type NativeAudioPlayerHandle,
@@ -86,27 +86,43 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [isMuted, setIsMuted] = useState(false);
   const [playbackUnavailable, setPlaybackUnavailable] = useState(false);
 
-  const goToIndex = useCallback((nextQueue: Song[], index: number, autoplay: boolean) => {
-    if (nextQueue.length === 0) {
-      setCurrentSong(null);
-      setIsPlaying(false);
-      setPlaybackUnavailable(true);
-      return;
-    }
+  const goToIndex = useCallback(
+    async (nextQueue: Song[], index: number, autoplay: boolean) => {
+      if (nextQueue.length === 0) {
+        setCurrentSong(null);
+        setIsPlaying(false);
+        setPlaybackUnavailable(true);
+        return;
+      }
 
-    const normalizedIndex = ((index % nextQueue.length) + nextQueue.length) % nextQueue.length;
-    const song = nextQueue[normalizedIndex];
+      const normalizedIndex = ((index % nextQueue.length) + nextQueue.length) % nextQueue.length;
+      const song = nextQueue[normalizedIndex];
 
-    setCurrentTime(0);
-    setDuration(0);
-    setPlaybackUnavailable(false);
-    setQueueIndex(normalizedIndex);
-    setCurrentSong(song);
-    loadedSongIdRef.current = song.id;
-    setIsPlaying(autoplay);
-    if (autoplay) setIsLoading(true);
-    audioHandleRef.current?.load(song.audioUrl, autoplay);
-  }, []);
+      setCurrentTime(0);
+      setDuration(0);
+      setPlaybackUnavailable(false);
+      setQueueIndex(normalizedIndex);
+      setCurrentSong(song);
+      loadedSongIdRef.current = song.id;
+      setIsPlaying(autoplay);
+      setIsLoading(true);
+
+      try {
+        const audioSrc = await fetchSongAudio(song.audioPath);
+        // If the user jumped to a different song while this was in
+        // flight, don't clobber whatever loaded after it.
+        if (loadedSongIdRef.current !== song.id) return;
+        audioHandleRef.current?.load(audioSrc, autoplay);
+        if (!autoplay) setIsLoading(false);
+      } catch {
+        if (loadedSongIdRef.current !== song.id) return;
+        setIsLoading(false);
+        setIsPlaying(false);
+        setPlaybackUnavailable(true);
+      }
+    },
+    []
+  );
 
   const playQueue = useCallback(
     (songs: Song[], category: CurrentCategory | null, startIndex = 0) => {
