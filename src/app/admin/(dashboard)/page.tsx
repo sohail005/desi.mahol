@@ -114,7 +114,7 @@ export default function AdminDashboardPage() {
 
       {toast && (
         <div
-          className={`fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-xl px-4 py-2.5 text-sm text-white shadow-lg ${
+          className={`fixed bottom-4 left-1/2 z-50 w-[calc(100vw-2rem)] max-w-sm -translate-x-1/2 rounded-xl px-4 py-2.5 text-center text-sm text-white shadow-lg ${
             toast.kind === "success" ? "bg-emerald-600/90" : "bg-red-600/90"
           }`}
         >

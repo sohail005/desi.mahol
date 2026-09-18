@@ -7,9 +7,9 @@ export default function Footer() {
       <p className="text-[16px] text-white/40">Desi Mahol · playing all day</p>
 
       <p className="mx-auto mt-6 max-w-xl px-4 text-[15.5px] leading-relaxed text-white/40">
-        Disclaimer: Audio plays through YouTube&rsquo;s embedded player. Nothing is hosted on
-        this site, and all rights stay with the labels, composers and performers. Song
-        credits are put together from film soundtrack listings.
+        Disclaimer: All rights to the music streamed here stay with the respective labels,
+        composers and performers. Song credits are put together from film soundtrack
+        listings.
       </p>
 
       <p className="mt-4 text-[15.5px] text-white/40">© Sohail 2026</p>
