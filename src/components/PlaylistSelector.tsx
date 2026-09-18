@@ -6,6 +6,7 @@ import { useRadio } from "@/hooks/useRadio";
 import { getPlaylistBySlug } from "@/lib/catalogue";
 import { songs } from "@/data/songs";
 import { playlists } from "@/data/playlists";
+import { externalPlaylists } from "@/data/externalPlaylists";
 
 function shuffle<T>(items: T[]): T[] {
   const copy = [...items];
@@ -17,7 +18,7 @@ function shuffle<T>(items: T[]): T[] {
 }
 
 export default function PlaylistSelector({ className = "" }: { className?: string }) {
-  const { playPlaylist, playSong } = useRadio();
+  const { playPlaylist, playSong, playExternalPlaylist, externalPlaylistId } = useRadio();
   const [isOpen, setIsOpen] = useState(false);
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -57,7 +58,15 @@ export default function PlaylistSelector({ className = "" }: { className?: strin
     }
   }
 
+  function handleSelectExternalPlaylist(youtubePlaylistId: string) {
+    setActiveSlug(null);
+    setIsOpen(false);
+    playExternalPlaylist(youtubePlaylistId);
+  }
+
   const activePlaylist = playlists.find((playlist) => playlist.slug === activeSlug) ?? null;
+  const activeExternalPlaylist =
+    externalPlaylists.find((playlist) => playlist.youtubePlaylistId === externalPlaylistId) ?? null;
 
   return (
     <div ref={rootRef} className={`relative ${className}`}>
@@ -69,7 +78,7 @@ export default function PlaylistSelector({ className = "" }: { className?: strin
         className="liquid-glass flex w-full items-center gap-1.5 rounded-full px-3 py-1.5 text-[14px] font-semibold text-white"
       >
         <ListMusic size={14} className="shrink-0 text-white/80" aria-hidden="true" />
-        {activePlaylist ? activePlaylist.titleEnglish : "Playlists"}
+        {activePlaylist?.titleEnglish ?? activeExternalPlaylist?.label ?? "Playlists"}
         <ChevronDown
           size={13}
           className={`ml-auto shrink-0 text-white/60 transition-transform ${isOpen ? "rotate-180" : ""}`}
@@ -94,6 +103,22 @@ export default function PlaylistSelector({ className = "" }: { className?: strin
             >
               <span className="text-[16px] font-medium">{playlist.titleEnglish}</span>
               <span className="text-[14px] text-white/50">{playlist.songIds.length} songs</span>
+            </button>
+          ))}
+
+          {externalPlaylists.map((playlist) => (
+            <button
+              key={playlist.id}
+              type="button"
+              role="option"
+              aria-selected={playlist.youtubePlaylistId === externalPlaylistId}
+              onClick={() => handleSelectExternalPlaylist(playlist.youtubePlaylistId)}
+              className={`flex flex-col items-start gap-0.5 rounded-xl px-3 py-2 text-left text-white transition hover:bg-white/10 ${
+                playlist.youtubePlaylistId === externalPlaylistId ? "bg-white/15" : ""
+              }`}
+            >
+              <span className="text-[16px] font-medium">{playlist.label}</span>
+              <span className="text-[14px] text-white/50">YouTube playlist</span>
             </button>
           ))}
 

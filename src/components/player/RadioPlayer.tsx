@@ -109,79 +109,77 @@ export default function RadioPlayer() {
         <button
           type="button"
           onClick={handleShare}
-          className="liquid-glass flex items-center gap-2 rounded-full px-4 py-1.5 text-[14px] text-white/95"
+          className="liquid-glass flex items-center gap-2 rounded-full px-4 py-1.5 text-[16px] text-white/95"
         >
           <Share2 size={13} />
           Share
         </button>
 
         {shareMessage && (
-          <p className="liquid-glass absolute bottom-full left-1/2 mb-2 -translate-x-1/2 rounded-full px-3 py-1.5 text-[14px] whitespace-nowrap text-white/90">
+          <p className="liquid-glass absolute bottom-full left-1/2 mb-2 -translate-x-1/2 rounded-full px-3 py-1.5 text-[16px] whitespace-nowrap text-white/90">
             {shareMessage}
           </p>
         )}
       </div>
 
-      <div className="liquid-glass-card mx-auto mt-2 flex max-w-2xl items-center gap-3 rounded-2xl px-4 py-2.5 shadow-lg sm:gap-4 sm:px-5 sm:py-3">
-        <span
-          className={`relative h-11 w-11 shrink-0 overflow-hidden rounded-full border border-white/15 sm:h-12 sm:w-12 ${
-            isPlaying ? "animate-spin-slow" : ""
-          }`}
-          aria-hidden="true"
-        >
-          {hasThumbnail ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={`https://i.ytimg.com/vi/${thumbnailVideoId}/default.jpg`}
-              alt=""
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <span className="liquid-glass flex h-full w-full items-center justify-center text-accent">
-              <Radio size={16} />
-            </span>
-          )}
-        </span>
+      <div className="liquid-glass-card mx-auto mt-2 flex max-w-2xl flex-col gap-2 rounded-2xl px-4 py-2.5 shadow-lg sm:px-5 sm:py-3">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <span
+            className={`relative h-11 w-11 shrink-0 overflow-hidden rounded-full border border-white/15 sm:h-12 sm:w-12 ${
+              isPlaying ? "animate-spin-slow" : ""
+            }`}
+            aria-hidden="true"
+          >
+            {hasThumbnail ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={`https://i.ytimg.com/vi/${thumbnailVideoId}/default.jpg`}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <span className="liquid-glass flex h-full w-full items-center justify-center text-accent">
+                <Radio size={16} />
+              </span>
+            )}
+          </span>
 
-        <div className="min-w-0 flex-1">
-          {externalPlaylistId ? (
-            <>
-              <p className="truncate text-[16px] font-semibold text-white sm:text-[18px]">
-                {externalVideo?.title ?? "Mood Radio"}
-              </p>
-              <p className="truncate text-[14px] text-white/50">
-                {isLoading ? "Tuning in…" : externalVideo?.author}
-              </p>
-              <div className="mt-1">
-                <PlayerProgress />
-              </div>
-            </>
-          ) : currentSong ? (
-            <>
-              <p className="truncate text-[16px] font-semibold text-white sm:text-[18px]">
-                {currentSong.titleEnglish}
-              </p>
-              <p className="truncate text-[14px] text-white/50">
-                {isLoading ? "Tuning in…" : `Credits: ${currentSong.artist}`}
-              </p>
-              <div className="mt-1">
-                <PlayerProgress />
-              </div>
-            </>
-          ) : (
-            <p className="text-[16px] text-white/60">Nothing tuned in yet</p>
-          )}
+          <div className="min-w-0 flex-1">
+            {externalPlaylistId ? (
+              <>
+                <p className="truncate text-[18px] font-semibold text-white sm:text-[20px]">
+                  {externalVideo?.title ?? "Mood Radio"}
+                </p>
+                <p className="truncate text-[16px] text-white/50">
+                  {isLoading ? "Tuning in…" : externalVideo?.author}
+                </p>
+              </>
+            ) : currentSong ? (
+              <>
+                <p className="truncate text-[18px] font-semibold text-white sm:text-[20px]">
+                  {currentSong.titleEnglish}
+                </p>
+                <p className="truncate text-[16px] text-white/50">
+                  {isLoading ? "Tuning in…" : `Credits: ${currentSong.artist}`}
+                </p>
+              </>
+            ) : (
+              <p className="text-[18px] text-white/60">Nothing tuned in yet</p>
+            )}
+          </div>
+
+          <PlayerControls />
+
+          <div className="hidden sm:block">
+            <PlayerVolume />
+          </div>
         </div>
 
-        <PlayerControls />
-
-        <div className="hidden sm:block">
-          <PlayerVolume />
-        </div>
+        {(externalPlaylistId || currentSong) && <PlayerProgress />}
       </div>
 
       {playbackUnavailable && (
-        <p className="mx-auto mt-2 max-w-2xl text-center text-[14px] text-amber-400">
+        <p className="mx-auto mt-2 max-w-2xl text-center text-[16px] text-amber-400">
           This track isn&apos;t available yet — add a YouTube ID to hear it.
         </p>
       )}

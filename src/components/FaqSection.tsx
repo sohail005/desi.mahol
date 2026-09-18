@@ -30,7 +30,7 @@ export default function FaqSection() {
   return (
     <section
       id="faq"
-      className="relative border-t border-white/5 bg-[#120806] px-5 py-16 sm:px-8 sm:py-24"
+      className="relative border-t border-white/5 bg-transparent px-5 py-16 sm:px-8 sm:py-24"
     >
       <div className="mx-auto max-w-2xl">
         <p className="mb-3 text-center text-[14px] font-semibold tracking-[0.3em] text-amber-400 uppercase">
@@ -44,7 +44,7 @@ export default function FaqSection() {
           {faqs.map((faq, index) => (
             <details
               key={faq.question}
-              className="faq-item liquid-glass-card rounded-xl p-4 sm:p-5"
+              className="faq-item liquid-glass rounded-xl bg-white/5 p-4 hover:bg-white/10 sm:p-5"
               open={index === 0}
             >
               <summary className="flex cursor-pointer list-none items-center justify-between text-[16px] font-medium text-white sm:text-[18px]">

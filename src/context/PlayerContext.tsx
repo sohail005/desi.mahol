@@ -384,6 +384,56 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [togglePlay, seek, currentTime, duration]);
 
+  // Media Session: lock-screen / notification "Now Playing" controls. Also
+  // signals to the OS that this tab is actively playing media, which on
+  // Android keeps audio going when the app is backgrounded (iOS Safari
+  // still suspends cross-origin iframe video in the background regardless).
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) return;
+
+    const title = externalVideo?.title ?? currentSong?.titleEnglish ?? "Desi Mahol";
+    const artist = externalVideo?.author ?? currentSong?.artist ?? "Desi Mahol";
+    const videoId = externalVideo?.videoId ?? currentSong?.youtubeId;
+    const artwork = videoId
+      ? [
+          {
+            src: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+            sizes: "480x360",
+            type: "image/jpeg",
+          },
+        ]
+      : [];
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title,
+      artist,
+      album: "Desi Mahol",
+      artwork,
+    });
+  }, [currentSong, externalVideo]);
+
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) return;
+    navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
+  }, [isPlaying]);
+
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) return;
+    const session = navigator.mediaSession;
+
+    session.setActionHandler("play", play);
+    session.setActionHandler("pause", pause);
+    session.setActionHandler("previoustrack", previous);
+    session.setActionHandler("nexttrack", next);
+
+    return () => {
+      session.setActionHandler("play", null);
+      session.setActionHandler("pause", null);
+      session.setActionHandler("previoustrack", null);
+      session.setActionHandler("nexttrack", null);
+    };
+  }, [play, pause, previous, next]);
+
   const handleReady = useCallback(() => {
     setIsReady(true);
     playerHandleRef.current?.setVolume(volume);

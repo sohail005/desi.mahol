@@ -26,7 +26,7 @@ export default function SupportModal({ onClose }: SupportModalProps) {
       onClick={onClose}
     >
       <div
-        className="liquid-glass-card relative w-full max-w-sm rounded-2xl bg-[#1c0704] p-6 pt-8 text-center shadow-xl"
+        className="liquid-glass-card relative w-full max-w-md rounded-2xl p-6 pt-8 text-center shadow-xl"
         onClick={(event) => event.stopPropagation()}
       >
         <button

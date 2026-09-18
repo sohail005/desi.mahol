@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="border-t border-white/5 bg-[#0d0503] px-5 py-8 text-center sm:px-8">
+    <footer className="border-t border-white/5 bg-transparent px-5 py-8 text-center sm:px-8">
       <p className="font-[family-name:var(--font-devanagari)] mb-1 text-[22px] text-amber-200/80">
         Desi Mahol
       </p>

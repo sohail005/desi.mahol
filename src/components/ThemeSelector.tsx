@@ -79,7 +79,7 @@ export default function ThemeSelector({
         onClick={() => setIsOpen((prev) => !prev)}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        className="liquid-glass flex h-8 w-full items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-white"
+        className="liquid-glass flex h-8 w-full items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-white sm:text-sm"
       >
         {activeTheme ? (
           <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center text-sm leading-none" aria-hidden="true">

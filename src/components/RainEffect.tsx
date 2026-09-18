@@ -142,7 +142,7 @@ export default function RainEffect() {
         filter.frequency.linearRampToValueAtTime(60, now + 2.5);
 
         oscGain.gain.setValueAtTime(0.01, now);
-        oscGain.gain.linearRampToValueAtTime(0.22, now + 0.1);
+        oscGain.gain.linearRampToValueAtTime(0.9, now + 0.1);
         oscGain.gain.exponentialRampToValueAtTime(0.001, now + 3.0);
 
         osc.connect(filter);
@@ -165,7 +165,7 @@ export default function RainEffect() {
         crackFilter.Q.value = 1.8;
 
         const crackGain = audioCtx.createGain();
-        crackGain.gain.setValueAtTime(0.18, now);
+        crackGain.gain.setValueAtTime(0.85, now);
         crackGain.gain.exponentialRampToValueAtTime(0.001, now + 2.2);
 
         crackSource.connect(crackFilter);

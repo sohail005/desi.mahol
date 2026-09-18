@@ -23,10 +23,7 @@ const features = [
 
 export default function AboutSection() {
   return (
-    <section
-      id="about"
-      className="relative bg-[#1c0704] px-5 py-16 sm:px-8 sm:py-24"
-    >
+    <section id="about" className="relative bg-transparent px-5 py-16 sm:px-8 sm:py-24">
       <div className="mx-auto max-w-3xl text-center">
         <p className="mb-3 text-[14px] font-semibold tracking-[0.3em] text-amber-400 uppercase">
           Welcome to
@@ -47,7 +44,7 @@ export default function AboutSection() {
         {features.map((feature) => (
           <div
             key={feature.title}
-            className="liquid-glass-card rounded-2xl p-6 text-left"
+            className="liquid-glass rounded-2xl bg-white/5 p-6 text-left hover:bg-white/10"
           >
             <div
               className="liquid-glass mb-4 flex h-10 w-10 items-center justify-center rounded-full border-amber-500/30"

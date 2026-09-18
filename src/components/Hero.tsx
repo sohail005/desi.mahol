@@ -10,11 +10,11 @@ import InstallAppButton from "@/components/InstallAppButton";
 import ThemeSelector from "@/components/ThemeSelector";
 import PlaylistSelector from "@/components/PlaylistSelector";
 import RadioPlayer from "@/components/player/RadioPlayer";
-import type { Theme } from "@/data/themes";
+import { useThemeContext } from "@/context/ThemeContext";
 
 const DEFAULT_OVERLAY = "linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.8) 100%)";
 const DEFAULT_DESKTOP_IMAGE = "/images/desimahol3.webp";
-const DEFAULT_MOBILE_IMAGE = "/images/desimaholnew.webp";
+const DEFAULT_MOBILE_IMAGE = "/images/desimahol-mobile-hero.jpg";
 
 // Hidden below sm — for nav items tucked into the mobile hamburger menu
 // instead of sitting in the always-visible top bar.
@@ -44,7 +44,7 @@ export default function Hero() {
   const onlineCount = useOnlineCount();
   const [isSupportOpen, setIsSupportOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activeTheme, setActiveTheme] = useState<Theme | null>(null);
+  const { activeTheme, setActiveTheme } = useThemeContext();
 
   return (
     <section className="relative flex min-h-screen w-full flex-col overflow-hidden">
@@ -53,6 +53,8 @@ export default function Hero() {
         alt="Desi Mahol — nostalgic Hindi radio"
         fill
         priority
+        quality={90}
+        sizes="(min-width: 640px) 100vw, 0px"
         className="hidden object-cover sm:block"
       />
       <Image
@@ -60,6 +62,8 @@ export default function Hero() {
         alt="Desi Mahol — nostalgic Hindi radio"
         fill
         priority
+        quality={90}
+        sizes="(min-width: 640px) 0px, 100vw"
         className="object-cover sm:hidden"
       />
       <div
@@ -67,8 +71,8 @@ export default function Hero() {
         style={{ background: activeTheme?.overlay ?? DEFAULT_OVERLAY }}
       />
 
-      <div className="relative z-30 grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-4 sm:gap-4 sm:px-6 sm:py-6">
-        <div className="liquid-glass col-start-1 flex items-center gap-1.5 justify-self-start rounded-full px-3 py-1.5 text-sm text-white">
+      <div className="relative z-30 grid grid-cols-[auto_1fr_auto] items-center gap-2 px-4 py-4 sm:gap-4 sm:px-6 sm:py-6">
+        <div className="liquid-glass col-start-1 flex items-center gap-1.5 justify-self-start rounded-full px-2.5 py-1.5 text-xs text-white sm:px-3 sm:text-sm">
           <span className="flex items-center gap-1.5 pl-1.5 font-semibold">
             <span className="relative flex h-1.5 w-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--green)] opacity-60" />
@@ -78,7 +82,7 @@ export default function Hero() {
           </span>
         </div>
 
-        <nav className="col-start-2 flex flex-wrap items-center justify-center gap-2 justify-self-center text-sm">
+        <nav className="col-start-2 flex flex-nowrap items-center justify-center gap-1.5 justify-self-center text-xs sm:flex-wrap sm:gap-2 sm:text-sm">
           <a href="#about" className={GLASS_LINK_DESKTOP_ONLY}>
             About
           </a>
@@ -91,7 +95,7 @@ export default function Hero() {
           <button
             type="button"
             onClick={() => setIsSupportOpen(true)}
-            className="liquid-glass inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 font-semibold text-white transition"
+            className="liquid-glass inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 font-semibold whitespace-nowrap text-white transition sm:px-4"
           >
             <Heart size={13} className="fill-current text-red-500" />
             Support us
@@ -141,12 +145,14 @@ export default function Hero() {
       )}
 
       <div className="relative z-10 mt-8 flex flex-1 flex-col px-4 text-center sm:mt-30 sm:px-6">
-        <p className="font-devanagari text-4xl leading-none font-bold text-white drop-shadow-lg sm:text-8xl">
-          Desi Mahol
-        </p>
-        <p className="mt-4 text-xs tracking-[0.2em] text-white/80 uppercase sm:tracking-[0.3em] sm:text-sm">
-          Old songs · pure desi vibes · playing all day
-        </p>
+        <div className="liquid-glass-card mx-auto flex flex-col rounded-2xl px-5 py-4 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:shadow-none sm:backdrop-blur-none">
+          <p className="font-devanagari text-4xl leading-none font-bold text-white drop-shadow-lg sm:text-8xl">
+            Desi Mahol
+          </p>
+          <p className="mt-4 text-xs tracking-[0.2em] text-white/80 uppercase sm:tracking-[0.3em] sm:text-sm">
+            Old songs · pure desi vibes · playing all day
+          </p>
+        </div>
       </div>
 
       <div className="relative z-10 flex flex-col items-center gap-4 px-4 pb-8 sm:pb-10">

@@ -134,7 +134,7 @@ input[type="range"]::-moz-range-thumb {
   }
 
   .liquid-glass-accent {
-    border: 1px solid rgb(255, 153, 0);
+    border: 1px solid var(--accent);
   }
 
   /* Liquid glass for larger panels/cards — a softer version of

@@ -2,8 +2,10 @@ import type { Metadata, Viewport } from "next";
 import { Dosis, Noto_Serif_Devanagari } from "next/font/google";
 import "./globals.css";
 import { PlayerProvider } from "@/context/PlayerContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import Footer from "@/components/Footer";
 import MiniPlayer from "@/components/player/MiniPlayer";
+import AmbientBackground from "@/components/AmbientBackground";
 
 const dosis = Dosis({
   subsets: ["latin"],
@@ -50,11 +52,14 @@ export default function RootLayout({
   return (
     <html lang="hi" className={`${dosis.variable} ${notoSerifDevanagari.variable}`}>
       <body className="font-[family-name:var(--font-body)] antialiased">
-        <PlayerProvider>
-          <main className="min-h-[70vh]">{children}</main>
-          <Footer />
-          <MiniPlayer />
-        </PlayerProvider>
+        <ThemeProvider>
+          <PlayerProvider>
+            <AmbientBackground />
+            <main className="min-h-[70vh]">{children}</main>
+            <Footer />
+            <MiniPlayer />
+          </PlayerProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
