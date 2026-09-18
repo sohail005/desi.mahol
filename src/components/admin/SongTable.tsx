@@ -46,11 +46,11 @@ export default function SongTable({ songs, isLoading, onDelete }: SongTableProps
 
   return (
     <div className="liquid-glass-card rounded-2xl p-5 text-white">
-      <div className="mb-4 flex items-center justify-between gap-3">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-sm font-semibold text-white/80 uppercase">
           Songs {!isLoading && <span className="text-white/40">({songs.length})</span>}
         </h2>
-        <div className="relative w-40 sm:w-56">
+        <div className="relative w-full sm:w-56">
           <Search size={14} className="absolute top-1/2 left-2.5 -translate-y-1/2 text-white/40" />
           <input
             type="text"
