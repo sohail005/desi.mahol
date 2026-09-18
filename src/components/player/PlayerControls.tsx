@@ -4,9 +4,10 @@ import { Pause, Play, SkipBack, SkipForward } from "lucide-react";
 import { useRadio } from "@/hooks/useRadio";
 
 export default function PlayerControls() {
-  const { isPlaying, isLoading, currentSong, togglePlay, next, previous } = useRadio();
+  const { isPlaying, isLoading, currentSong, externalPlaylistId, togglePlay, next, previous } =
+    useRadio();
 
-  const disabled = !currentSong;
+  const disabled = !currentSong && !externalPlaylistId;
 
   return (
     <div className="flex items-center gap-3 sm:gap-4">

@@ -3,9 +3,19 @@
  * https://developers.google.com/youtube/iframe_api_reference
  */
 
+export interface YTVideoData {
+  video_id: string;
+  title: string;
+  author: string;
+}
+
 export interface YTPlayer {
   loadVideoById(videoId: string): void;
   cueVideoById(videoId: string): void;
+  loadPlaylist(options: { listType: "playlist"; list: string; index?: number }): void;
+  nextVideo(): void;
+  previousVideo(): void;
+  getVideoData(): YTVideoData | undefined;
   playVideo(): void;
   pauseVideo(): void;
   stopVideo(): void;

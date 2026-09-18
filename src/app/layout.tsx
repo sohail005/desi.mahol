@@ -1,12 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans, Noto_Serif_Devanagari } from "next/font/google";
+import { Dosis, Noto_Serif_Devanagari } from "next/font/google";
 import "./globals.css";
 import { PlayerProvider } from "@/context/PlayerContext";
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import MiniPlayer from "@/components/player/MiniPlayer";
 
-const dmSans = DM_Sans({
+const dosis = Dosis({
   subsets: ["latin"],
+  weight: ["200", "300", "400", "500", "600", "700", "800"],
   variable: "--font-body",
   display: "swap",
 });
@@ -47,12 +48,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="hi" className={`${dmSans.variable} ${notoSerifDevanagari.variable}`}>
+    <html lang="hi" className={`${dosis.variable} ${notoSerifDevanagari.variable}`}>
       <body className="font-[family-name:var(--font-body)] antialiased">
         <PlayerProvider>
-          <Header />
           <main className="min-h-[70vh]">{children}</main>
           <Footer />
+          <MiniPlayer />
         </PlayerProvider>
       </body>
     </html>

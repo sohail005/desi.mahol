@@ -12,7 +12,7 @@ const faqs = [
   {
     question: "What kind of music plays on Desi Mahol?",
     answer:
-      "Desi Mahol plays old, evergreen Hindi songs across curated rotations like Shaadi & Sunday, Saloon Classics, 90s Dard and Highway Raat.",
+      "Desi Mahol plays old, evergreen Hindi songs across curated rotations like Happy & Sunday, Desimahol Classics, 90s Hit and Highway Specials.",
   },
   {
     question: "How does the rotation work?",
@@ -33,10 +33,10 @@ export default function FaqSection() {
       className="relative border-t border-white/5 bg-[#120806] px-5 py-16 sm:px-8 sm:py-24"
     >
       <div className="mx-auto max-w-2xl">
-        <p className="mb-3 text-center text-xs font-semibold tracking-[0.3em] text-amber-400 uppercase">
+        <p className="mb-3 text-center text-[14px] font-semibold tracking-[0.3em] text-amber-400 uppercase">
           FAQ
         </p>
-        <h2 className="mb-10 text-center font-[family-name:var(--font-devanagari)] text-3xl text-white sm:text-4xl">
+        <h2 className="mb-10 text-center font-[family-name:var(--font-devanagari)] text-[32px] text-white sm:text-[38px]">
           Desi Mahol, Explained
         </h2>
 
@@ -47,7 +47,7 @@ export default function FaqSection() {
               className="faq-item liquid-glass-card rounded-xl p-4 sm:p-5"
               open={index === 0}
             >
-              <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium text-white sm:text-base">
+              <summary className="flex cursor-pointer list-none items-center justify-between text-[16px] font-medium text-white sm:text-[18px]">
                 {faq.question}
                 <svg
                   className="faq-chevron h-4 w-4 shrink-0 text-amber-400 transition-transform"
@@ -60,7 +60,7 @@ export default function FaqSection() {
                   <path d="m6 9 6 6 6-6" />
                 </svg>
               </summary>
-              <p className="mt-3 text-sm leading-relaxed text-white/60">{faq.answer}</p>
+              <p className="mt-3 text-[16px] leading-relaxed text-white/60">{faq.answer}</p>
             </details>
           ))}
         </div>

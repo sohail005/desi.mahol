@@ -29,6 +29,12 @@ interface PlaySongOptions {
   playlistSlug?: string | null;
 }
 
+export interface ExternalVideoInfo {
+  videoId: string;
+  title: string;
+  author: string;
+}
+
 export interface PlayerContextValue {
   currentSong: Song | null;
   currentPlaylist: Playlist | null;
@@ -42,10 +48,13 @@ export interface PlayerContextValue {
   isMuted: boolean;
   queue: Song[];
   playbackUnavailable: boolean;
+  externalPlaylistId: string | null;
+  externalVideo: ExternalVideoInfo | null;
 
   tuneIn: () => void;
   playSong: (song: Song, options?: PlaySongOptions) => void;
   playPlaylist: (playlist: Playlist, startIndex?: number) => void;
+  playExternalPlaylist: (playlistId: string) => void;
   play: () => void;
   pause: () => void;
   togglePlay: () => void;
@@ -92,6 +101,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [volume, setVolumeState] = useState(DEFAULT_VOLUME);
   const [isMuted, setIsMuted] = useState(false);
   const [playbackUnavailable, setPlaybackUnavailable] = useState(false);
+  const [externalPlaylistId, setExternalPlaylistId] = useState<string | null>(null);
+  const [externalVideo, setExternalVideo] = useState<ExternalVideoInfo | null>(null);
 
   const currentPlaylist = useMemo(
     () => (currentPlaylistSlug ? getPlaylistBySlug(currentPlaylistSlug) ?? null : null),
@@ -137,6 +148,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       const nextQueue = options?.queue ?? [song];
       const slug = options?.playlistSlug ?? null;
       const idx = nextQueue.findIndex((s) => s.id === song.id);
+      setExternalPlaylistId(null);
+      setExternalVideo(null);
       setQueue(nextQueue);
       setCurrentPlaylistSlug(slug);
       goToIndex(nextQueue, idx === -1 ? 0 : idx, true);
@@ -147,12 +160,29 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const playPlaylist = useCallback(
     (playlist: Playlist, startIndex = 0) => {
       const nextQueue = getSongsForPlaylist(playlist);
+      setExternalPlaylistId(null);
+      setExternalVideo(null);
       setQueue(nextQueue);
       setCurrentPlaylistSlug(playlist.slug);
       goToIndex(nextQueue, startIndex, true);
     },
     [goToIndex]
   );
+
+  const playExternalPlaylist = useCallback((playlistId: string) => {
+    setQueue([]);
+    setQueueIndex(0);
+    setCurrentSong(null);
+    setCurrentPlaylistSlug(null);
+    setExternalVideo(null);
+    setExternalPlaylistId(playlistId);
+    setCurrentTime(0);
+    setDuration(0);
+    setPlaybackUnavailable(false);
+    setIsLoading(true);
+    setIsPlaying(true);
+    playerHandleRef.current?.loadPlaylist(playlistId);
+  }, []);
 
   const tuneIn = useCallback(() => {
     setHasTunedIn(true);
@@ -163,6 +193,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [playPlaylist]);
 
   const play = useCallback(() => {
+    if (externalPlaylistId) {
+      playerHandleRef.current?.play();
+      setIsPlaying(true);
+      return;
+    }
     if (!currentSong) return;
     if (loadedVideoIdRef.current === currentSong.youtubeId && !playbackUnavailable) {
       playerHandleRef.current?.play();
@@ -170,7 +205,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     } else {
       goToIndex(queue, queueIndex, true);
     }
-  }, [currentSong, playbackUnavailable, goToIndex, queue, queueIndex]);
+  }, [currentSong, playbackUnavailable, goToIndex, queue, queueIndex, externalPlaylistId]);
 
   const pause = useCallback(() => {
     playerHandleRef.current?.pause();
@@ -183,11 +218,21 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [isPlaying, play, pause]);
 
   const next = useCallback(() => {
+    if (externalPlaylistId) {
+      setIsLoading(true);
+      playerHandleRef.current?.nextVideo();
+      return;
+    }
     if (queue.length === 0) return;
     goToIndex(queue, queueIndex + 1, true);
-  }, [queue, queueIndex, goToIndex]);
+  }, [queue, queueIndex, goToIndex, externalPlaylistId]);
 
   const previous = useCallback(() => {
+    if (externalPlaylistId) {
+      setIsLoading(true);
+      playerHandleRef.current?.previousVideo();
+      return;
+    }
     if (queue.length === 0) return;
     if (currentTime > 5) {
       playerHandleRef.current?.seekTo(0);
@@ -195,7 +240,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       return;
     }
     goToIndex(queue, queueIndex - 1, true, -1);
-  }, [queue, queueIndex, currentTime, goToIndex]);
+  }, [queue, queueIndex, currentTime, goToIndex, externalPlaylistId]);
 
   const seek = useCallback((seconds: number) => {
     playerHandleRef.current?.seekTo(seconds);
@@ -351,7 +396,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     setPlaybackUnavailable(false);
     skipAttemptsRef.current = 0;
     playbackChannelRef.current?.postMessage({ type: "playing", tabId: tabIdRef.current });
-  }, []);
+    if (externalPlaylistId) {
+      const data = playerHandleRef.current?.getVideoData();
+      if (data) {
+        setExternalVideo({ videoId: data.video_id, title: data.title, author: data.author });
+      }
+    }
+  }, [externalPlaylistId]);
 
   const handlePaused = useCallback(() => {
     setIsPlaying(false);
@@ -359,19 +410,30 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const handleEnded = useCallback(() => {
     skipAttemptsRef.current = 0;
+    // YouTube advances its own playlist internally on ended.
+    if (externalPlaylistId) return;
     goToIndex(queue, queueIndex + 1, true);
-  }, [queue, queueIndex, goToIndex]);
+  }, [queue, queueIndex, goToIndex, externalPlaylistId]);
 
   const handleError = useCallback(() => {
     skipAttemptsRef.current += 1;
     setIsLoading(false);
+    if (externalPlaylistId) {
+      if (skipAttemptsRef.current > 20) {
+        setIsPlaying(false);
+        setPlaybackUnavailable(true);
+        return;
+      }
+      playerHandleRef.current?.nextVideo();
+      return;
+    }
     if (skipAttemptsRef.current > Math.max(queue.length, 1)) {
       setIsPlaying(false);
       setPlaybackUnavailable(true);
       return;
     }
     goToIndex(queue, queueIndex + 1, true);
-  }, [queue, queueIndex, goToIndex]);
+  }, [queue, queueIndex, goToIndex, externalPlaylistId]);
 
   const value = useMemo<PlayerContextValue>(
     () => ({
@@ -387,9 +449,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       isMuted,
       queue,
       playbackUnavailable,
+      externalPlaylistId,
+      externalVideo,
       tuneIn,
       playSong,
       playPlaylist,
+      playExternalPlaylist,
       play,
       pause,
       togglePlay,
@@ -412,9 +477,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       isMuted,
       queue,
       playbackUnavailable,
+      externalPlaylistId,
+      externalVideo,
       tuneIn,
       playSong,
       playPlaylist,
+      playExternalPlaylist,
       play,
       pause,
       togglePlay,

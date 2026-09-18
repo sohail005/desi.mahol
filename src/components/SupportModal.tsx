@@ -26,7 +26,7 @@ export default function SupportModal({ onClose }: SupportModalProps) {
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-sm rounded-2xl border border-white/10 bg-[#1c0704] p-6 pt-8 text-center shadow-xl"
+        className="liquid-glass-card relative w-full max-w-sm rounded-2xl bg-[#1c0704] p-6 pt-8 text-center shadow-xl"
         onClick={(event) => event.stopPropagation()}
       >
         <button
@@ -38,10 +38,10 @@ export default function SupportModal({ onClose }: SupportModalProps) {
           <X size={15} />
         </button>
 
-        <h3 className="font-[family-name:var(--font-devanagari)] px-2 text-xl font-semibold text-white sm:text-2xl">
+        <h3 className="font-[family-name:var(--font-devanagari)] px-2 text-[22px] font-semibold text-white sm:text-[26px]">
           No ads — just memories. Support the platform to stay forever.
         </h3>
-        <p className="mt-3 text-base leading-relaxed text-white/60">
+        <p className="mt-3 text-[18px] leading-relaxed text-white/60">
           We promise never to put ads and ruin your experience. But web server costs are
           high to keep this website smooth — please send any amount you wish. Thank you
           in advance! ❤️
@@ -56,21 +56,21 @@ export default function SupportModal({ onClose }: SupportModalProps) {
             className="h-full w-full object-contain"
           />
         </div>
-        <p className="mt-2 text-sm text-white/40">QR code to support Desi Mahol</p>
+        <p className="mt-2 text-[16px] text-white/40">QR code to support Desi Mahol</p>
 
         <a
           href="/images/desimaholqr.jpg"
           download="desi-mahol-qr.jpg"
-          className="mt-4 inline-block text-sm font-semibold text-amber-400 underline decoration-amber-500/40 hover:text-amber-300"
+          className="mt-4 inline-block text-[16px] font-semibold text-amber-400 underline decoration-amber-500/40 hover:text-amber-300"
         >
           Download QR Code
         </a>
-        <p className="mt-1 text-xs text-white/40">Save it and scan with any UPI app.</p>
+        <p className="mt-1 text-[14px] text-white/40">Save it and scan with any UPI app.</p>
 
         <button
           type="button"
           onClick={onClose}
-          className="mt-6 text-sm text-white/50 underline hover:text-white/80"
+          className="mt-6 text-[16px] text-white/50 underline hover:text-white/80"
         >
           Dismiss
         </button>

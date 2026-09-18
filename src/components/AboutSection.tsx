@@ -28,13 +28,13 @@ export default function AboutSection() {
       className="relative bg-[#1c0704] px-5 py-16 sm:px-8 sm:py-24"
     >
       <div className="mx-auto max-w-3xl text-center">
-        <p className="mb-3 text-xs font-semibold tracking-[0.3em] text-amber-400 uppercase">
+        <p className="mb-3 text-[14px] font-semibold tracking-[0.3em] text-amber-400 uppercase">
           Welcome to
         </p>
-        <h2 className="font-[family-name:var(--font-devanagari)] text-3xl text-white sm:text-5xl">
+        <h2 className="font-[family-name:var(--font-devanagari)] text-[32px] text-white sm:text-[50px]">
           Desi Mahol — the Mood of Old Songs
         </h2>
-        <p className="mt-6 text-sm leading-relaxed text-white/70 sm:text-base">
+        <p className="mt-6 text-[16px] leading-relaxed text-white/70 sm:text-[18px]">
           Desi Mahol is a free ambient Hindi radio built to recreate one very specific
           feeling: an old shop radio left on in the background, playing timeless Hindi
           songs while the day goes by. Press play, and Desi Mahol streams a nonstop mix
@@ -55,8 +55,8 @@ export default function AboutSection() {
             >
               <feature.icon className="h-5 w-5 text-amber-400" />
             </div>
-            <h3 className="mb-2 font-semibold text-white">{feature.title}</h3>
-            <p className="text-sm leading-relaxed text-white/60">{feature.description}</p>
+            <h3 className="mb-2 text-[18px] font-semibold text-white">{feature.title}</h3>
+            <p className="text-[16px] leading-relaxed text-white/60">{feature.description}</p>
           </div>
         ))}
       </div>

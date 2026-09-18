@@ -1,11 +1,21 @@
 "use client";
 
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
-import { loadYouTubeApi, YT_PLAYER_STATE, type YTPlayer, type YTPlayerEvent } from "@/lib/youtube";
+import {
+  loadYouTubeApi,
+  YT_PLAYER_STATE,
+  type YTPlayer,
+  type YTPlayerEvent,
+  type YTVideoData,
+} from "@/lib/youtube";
 
 export interface YouTubePlayerHandle {
   loadVideoById(videoId: string): void;
   cueVideoById(videoId: string): void;
+  loadPlaylist(playlistId: string): void;
+  nextVideo(): void;
+  previousVideo(): void;
+  getVideoData(): YTVideoData | null;
   play(): void;
   pause(): void;
   seekTo(seconds: number): void;
@@ -34,6 +44,7 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(functi
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YTPlayer | null>(null);
   const pendingVideoIdRef = useRef<string | null>(null);
+  const pendingPlaylistIdRef = useRef<string | null>(null);
   const pendingAutoplayRef = useRef(false);
   const currentVideoIdRef = useRef<string | null>(null);
   const callbacksRef = useRef({ onReady, onEnded, onPlaying, onPaused, onError });
@@ -55,7 +66,13 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(functi
         },
         events: {
           onReady: () => {
-            if (pendingVideoIdRef.current) {
+            if (pendingPlaylistIdRef.current) {
+              playerRef.current?.loadPlaylist({
+                listType: "playlist",
+                list: pendingPlaylistIdRef.current,
+              });
+              pendingPlaylistIdRef.current = null;
+            } else if (pendingVideoIdRef.current) {
               if (pendingAutoplayRef.current) {
                 playerRef.current?.loadVideoById(pendingVideoIdRef.current);
               } else {
@@ -114,6 +131,23 @@ const YouTubePlayer = forwardRef<YouTubePlayerHandle, YouTubePlayerProps>(functi
       } else {
         pendingVideoIdRef.current = videoId;
       }
+    },
+    loadPlaylist(playlistId: string) {
+      currentVideoIdRef.current = playlistId;
+      if (playerRef.current) {
+        playerRef.current.loadPlaylist({ listType: "playlist", list: playlistId });
+      } else {
+        pendingPlaylistIdRef.current = playlistId;
+      }
+    },
+    nextVideo() {
+      playerRef.current?.nextVideo();
+    },
+    previousVideo() {
+      playerRef.current?.previousVideo();
+    },
+    getVideoData() {
+      return playerRef.current?.getVideoData() ?? null;
     },
     play() {
       playerRef.current?.playVideo();

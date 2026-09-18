@@ -14,7 +14,7 @@ export default function PlayerProgress() {
   }
 
   return (
-    <div className="flex w-full items-center gap-2 text-[10px] text-white/60">
+    <div className="flex w-full items-center gap-2 text-[12px] text-white/60">
       <span className="w-8 shrink-0 text-right tabular-nums">{formatDuration(currentTime)}</span>
       <input
         type="range"

@@ -9,10 +9,10 @@ import type { Playlist } from "@/types/music";
  */
 export const playlists: Playlist[] = [
   {
-    id: "shaadi-sunday",
-    slug: "shaadi-sunday",
+    id: "jappy-sunday",
+    slug: "happy-sunday",
     titleHindi: "शादी और रविवार",
-    titleEnglish: "Shaadi & Sunday",
+    titleEnglish: "Happy & Sunday",
     description:
       "Celebration songs, family favourites and cheerful weekend energy.",
     startHour: 5,
@@ -25,10 +25,10 @@ export const playlists: Playlist[] = [
     ],
   },
   {
-    id: "saloon-classics",
-    slug: "saloon-classics",
+    id: "desimahol-classics",
+    slug: "desimahol-classics",
     titleHindi: "पुराने नग़मे",
-    titleEnglish: "Saloon Classics",
+    titleEnglish: "Desi Mahol Classics",
     description:
       "A warm daytime collection of evergreen Hindi classics.",
     startHour: 9,
@@ -40,10 +40,10 @@ export const playlists: Playlist[] = [
     ],
   },
   {
-    id: "90s-dard",
-    slug: "90s-dard",
-    titleHindi: "90s दर्द",
-    titleEnglish: "90s Dard",
+    id: "90s-Hit",
+    slug: "90s-hit",
+    titleHindi: "90s हिट",
+    titleEnglish: "90s Hit",
     description:
       "Melancholy favourites, heartbreak songs and unforgettable melodies.",
     startHour: 18,
@@ -57,10 +57,10 @@ export const playlists: Playlist[] = [
     ],
   },
   {
-    id: "highway-raat",
-    slug: "highway-raat",
+    id: "highway-specials",
+    slug: "highway-specials",
     titleHindi: "हाईवे रात",
-    titleEnglish: "Highway Raat",
+    titleEnglish: "Highway Specials",
     description:
       "Late-night songs for long roads, quiet rooms and old memories.",
     startHour: 22,

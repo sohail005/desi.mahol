@@ -1,23 +1,90 @@
 "use client";
 
-import { Radio } from "lucide-react";
+import { useState } from "react";
+import { Radio, Share2 } from "lucide-react";
 import { useRadio } from "@/hooks/useRadio";
 import { isPlaceholderYoutubeId } from "@/lib/youtube";
 import PlayerControls from "@/components/player/PlayerControls";
 import PlayerProgress from "@/components/player/PlayerProgress";
 import PlayerVolume from "@/components/player/PlayerVolume";
+import RainEffect from "@/components/RainEffect";
+import PlaylistSelector from "@/components/PlaylistSelector";
+
+function copyToClipboard(text: string): boolean {
+  if (typeof navigator !== "undefined" && navigator.clipboard) {
+    navigator.clipboard.writeText(text).catch(() => {
+      fallbackCopy(text);
+    });
+    return true;
+  }
+  return fallbackCopy(text);
+}
+
+function fallbackCopy(text: string): boolean {
+  if (typeof document === "undefined") return false;
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  let succeeded = false;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-deprecated -- last-resort fallback when Clipboard API is unavailable
+    succeeded = document.execCommand("copy");
+  } catch {
+    succeeded = false;
+  }
+  document.body.removeChild(textarea);
+  return succeeded;
+}
 
 export default function RadioPlayer() {
-  const { currentSong, isPlaying, hasTunedIn, isLoading, playbackUnavailable, tuneIn } =
-    useRadio();
+  const {
+    currentSong,
+    isPlaying,
+    hasTunedIn,
+    isLoading,
+    playbackUnavailable,
+    tuneIn,
+    externalPlaylistId,
+    externalVideo,
+  } = useRadio();
+  const [shareMessage, setShareMessage] = useState<string | null>(null);
 
-  if (!hasTunedIn && !currentSong) {
+  async function handleShare() {
+    const shareData = {
+      title: "Desi Mahol",
+      text: "Desi Mahol — old Hindi songs, playing all day.",
+      url: typeof window !== "undefined" ? window.location.origin : undefined,
+    };
+
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") return;
+        // Some browsers report share as supported but throw — fall through to copy.
+      }
+    }
+
+    if (shareData.url && copyToClipboard(shareData.url)) {
+      setShareMessage("Link copied!");
+    } else {
+      setShareMessage("Couldn't share — copy the URL manually.");
+    }
+    window.setTimeout(() => setShareMessage(null), 2000);
+  }
+
+  if (!hasTunedIn && !currentSong && !externalPlaylistId) {
     return (
-      <div className="absolute inset-x-3 bottom-3 z-20 sm:inset-x-6 sm:bottom-6">
+      <div className="absolute inset-x-3 top-[76%] z-40 -translate-y-1/2 sm:inset-x-6">
         <button
           type="button"
           onClick={tuneIn}
-          className="liquid-glass-card mx-auto flex w-full max-w-2xl items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-white shadow-lg transition"
+          className="liquid-glass-card mx-auto flex w-full max-w-2xl items-center justify-center gap-2 rounded-2xl px-4 py-3 text-[16px] font-semibold text-white shadow-lg transition"
         >
           <Radio size={16} className="text-accent" />
           Tap to Tune In
@@ -26,15 +93,36 @@ export default function RadioPlayer() {
     );
   }
 
-  const hasThumbnail = currentSong && !isPlaceholderYoutubeId(currentSong.youtubeId);
+  const hasThumbnail =
+    (currentSong && !isPlaceholderYoutubeId(currentSong.youtubeId)) || !!externalVideo?.videoId;
+  const thumbnailVideoId = currentSong?.youtubeId ?? externalVideo?.videoId;
 
   return (
     <div
       role="region"
       aria-label="Now playing"
-      className="absolute inset-x-3 bottom-3 z-20 sm:inset-x-6 sm:bottom-6"
+      className="absolute inset-x-3 top-[76%] z-40 -translate-y-1/2 sm:inset-x-6"
     >
-      <div className="liquid-glass-card mx-auto flex max-w-2xl items-center gap-3 rounded-2xl px-4 py-2.5 shadow-lg sm:gap-4 sm:px-5 sm:py-3">
+      <div className="relative mx-auto flex w-fit items-center justify-center gap-2">
+        <PlaylistSelector className="w-auto" />
+        <RainEffect />
+        <button
+          type="button"
+          onClick={handleShare}
+          className="liquid-glass flex items-center gap-2 rounded-full px-4 py-1.5 text-[14px] text-white/95"
+        >
+          <Share2 size={13} />
+          Share
+        </button>
+
+        {shareMessage && (
+          <p className="liquid-glass absolute bottom-full left-1/2 mb-2 -translate-x-1/2 rounded-full px-3 py-1.5 text-[14px] whitespace-nowrap text-white/90">
+            {shareMessage}
+          </p>
+        )}
+      </div>
+
+      <div className="liquid-glass-card mx-auto mt-2 flex max-w-2xl items-center gap-3 rounded-2xl px-4 py-2.5 shadow-lg sm:gap-4 sm:px-5 sm:py-3">
         <span
           className={`relative h-11 w-11 shrink-0 overflow-hidden rounded-full border border-white/15 sm:h-12 sm:w-12 ${
             isPlaying ? "animate-spin-slow" : ""
@@ -44,24 +132,36 @@ export default function RadioPlayer() {
           {hasThumbnail ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={`https://i.ytimg.com/vi/${currentSong!.youtubeId}/default.jpg`}
+              src={`https://i.ytimg.com/vi/${thumbnailVideoId}/default.jpg`}
               alt=""
               className="h-full w-full object-cover"
             />
           ) : (
-            <span className="flex h-full w-full items-center justify-center bg-white/5 text-[var(--accent)]">
+            <span className="liquid-glass flex h-full w-full items-center justify-center text-accent">
               <Radio size={16} />
             </span>
           )}
         </span>
 
         <div className="min-w-0 flex-1">
-          {currentSong ? (
+          {externalPlaylistId ? (
             <>
-              <p className="truncate text-sm font-semibold text-white sm:text-base">
+              <p className="truncate text-[16px] font-semibold text-white sm:text-[18px]">
+                {externalVideo?.title ?? "Mood Radio"}
+              </p>
+              <p className="truncate text-[14px] text-white/50">
+                {isLoading ? "Tuning in…" : externalVideo?.author}
+              </p>
+              <div className="mt-1">
+                <PlayerProgress />
+              </div>
+            </>
+          ) : currentSong ? (
+            <>
+              <p className="truncate text-[16px] font-semibold text-white sm:text-[18px]">
                 {currentSong.titleEnglish}
               </p>
-              <p className="truncate text-xs text-white/50">
+              <p className="truncate text-[14px] text-white/50">
                 {isLoading ? "Tuning in…" : `Credits: ${currentSong.artist}`}
               </p>
               <div className="mt-1">
@@ -69,7 +169,7 @@ export default function RadioPlayer() {
               </div>
             </>
           ) : (
-            <p className="text-sm text-white/60">Nothing tuned in yet</p>
+            <p className="text-[16px] text-white/60">Nothing tuned in yet</p>
           )}
         </div>
 
@@ -81,7 +181,7 @@ export default function RadioPlayer() {
       </div>
 
       {playbackUnavailable && (
-        <p className="mx-auto mt-2 max-w-2xl text-center text-xs text-amber-400">
+        <p className="mx-auto mt-2 max-w-2xl text-center text-[14px] text-amber-400">
           This track isn&apos;t available yet — add a YouTube ID to hear it.
         </p>
       )}
