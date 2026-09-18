@@ -9,35 +9,31 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { Song, Playlist } from "@/types/music";
-import { getPlaylistBySlug, getSongById, getSongsForPlaylist } from "@/lib/catalogue";
-import { getCurrentRotation, getRadioStartingPosition } from "@/lib/rotation";
-import { isPlaceholderYoutubeId } from "@/lib/youtube";
-import YouTubePlayer, { type YouTubePlayerHandle } from "@/components/player/YouTubePlayer";
+import type { Song } from "@/types/music";
+import { fetchSongsByCategory } from "@/lib/firebase/songs";
+import { getCurrentCategoryId, getRadioStartingPosition } from "@/lib/rotation";
+import NativeAudioPlayer, {
+  type NativeAudioPlayerHandle,
+} from "@/components/player/NativeAudioPlayer";
 
 const STORAGE_KEYS = {
   song: "desi-mahol.current-song",
-  playlist: "desi-mahol.current-playlist",
+  queue: "desi-mahol.queue",
+  category: "desi-mahol.current-category",
   volume: "desi-mahol.volume",
   tunedIn: "desi-mahol.has-tuned-in",
 } as const;
 
 const DEFAULT_VOLUME = 80;
 
-interface PlaySongOptions {
-  queue?: Song[];
-  playlistSlug?: string | null;
-}
-
-export interface ExternalVideoInfo {
-  videoId: string;
-  title: string;
-  author: string;
+export interface CurrentCategory {
+  id: string;
+  name: string;
 }
 
 export interface PlayerContextValue {
   currentSong: Song | null;
-  currentPlaylist: Playlist | null;
+  currentCategory: CurrentCategory | null;
   isPlaying: boolean;
   isLoading: boolean;
   isReady: boolean;
@@ -48,13 +44,9 @@ export interface PlayerContextValue {
   isMuted: boolean;
   queue: Song[];
   playbackUnavailable: boolean;
-  externalPlaylistId: string | null;
-  externalVideo: ExternalVideoInfo | null;
 
   tuneIn: () => void;
-  playSong: (song: Song, options?: PlaySongOptions) => void;
-  playPlaylist: (playlist: Playlist, startIndex?: number) => void;
-  playExternalPlaylist: (playlistId: string) => void;
+  playQueue: (songs: Song[], category: CurrentCategory | null, startIndex?: number) => void;
   play: () => void;
   pause: () => void;
   togglePlay: () => void;
@@ -67,19 +59,9 @@ export interface PlayerContextValue {
 
 export const PlayerContext = createContext<PlayerContextValue | null>(null);
 
-function findPlayableIndex(queue: Song[], startIndex: number, direction: 1 | -1): number {
-  const len = queue.length;
-  if (len === 0) return -1;
-  for (let i = 0; i < len; i++) {
-    const idx = (((startIndex + i * direction) % len) + len) % len;
-    if (!isPlaceholderYoutubeId(queue[idx].youtubeId)) return idx;
-  }
-  return -1;
-}
-
 export function PlayerProvider({ children }: { children: ReactNode }) {
-  const playerHandleRef = useRef<YouTubePlayerHandle>(null);
-  const loadedVideoIdRef = useRef<string | null>(null);
+  const audioHandleRef = useRef<NativeAudioPlayerHandle>(null);
+  const loadedSongIdRef = useRef<string | null>(null);
   const skipAttemptsRef = useRef(0);
   const hasRestoredRef = useRef(false);
   const tabIdRef = useRef<string | null>(null);
@@ -91,124 +73,78 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [queue, setQueue] = useState<Song[]>([]);
   const [queueIndex, setQueueIndex] = useState(0);
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
-  const [currentPlaylistSlug, setCurrentPlaylistSlug] = useState<string | null>(null);
+  const [currentCategory, setCurrentCategory] = useState<CurrentCategory | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isReady, setIsReady] = useState(false);
+  // No async SDK to wait for with a plain <audio> element (unlike the old
+  // YouTube IFrame API), so this is true from the start.
+  const [isReady] = useState(true);
   const [hasTunedIn, setHasTunedIn] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolumeState] = useState(DEFAULT_VOLUME);
   const [isMuted, setIsMuted] = useState(false);
   const [playbackUnavailable, setPlaybackUnavailable] = useState(false);
-  const [externalPlaylistId, setExternalPlaylistId] = useState<string | null>(null);
-  const [externalVideo, setExternalVideo] = useState<ExternalVideoInfo | null>(null);
 
-  const currentPlaylist = useMemo(
-    () => (currentPlaylistSlug ? getPlaylistBySlug(currentPlaylistSlug) ?? null : null),
-    [currentPlaylistSlug]
-  );
+  const goToIndex = useCallback((nextQueue: Song[], index: number, autoplay: boolean) => {
+    if (nextQueue.length === 0) {
+      setCurrentSong(null);
+      setIsPlaying(false);
+      setPlaybackUnavailable(true);
+      return;
+    }
 
-  const goToIndex = useCallback(
-    (nextQueue: Song[], index: number, autoplay: boolean, direction: 1 | -1 = 1) => {
-      if (nextQueue.length === 0) return;
-      const playableIdx = findPlayableIndex(nextQueue, index, direction);
-      setCurrentTime(0);
-      setDuration(0);
+    const normalizedIndex = ((index % nextQueue.length) + nextQueue.length) % nextQueue.length;
+    const song = nextQueue[normalizedIndex];
 
-      if (playableIdx === -1) {
-        setQueueIndex(((index % nextQueue.length) + nextQueue.length) % nextQueue.length);
-        setCurrentSong(nextQueue[index] ?? nextQueue[0]);
-        setIsPlaying(false);
-        setPlaybackUnavailable(true);
-        return;
-      }
-
-      setPlaybackUnavailable(false);
-      setQueueIndex(playableIdx);
-      const song = nextQueue[playableIdx];
-      setCurrentSong(song);
-      loadedVideoIdRef.current = song.youtubeId;
-
-      if (autoplay) {
-        setIsLoading(true);
-        setIsPlaying(true);
-        playerHandleRef.current?.loadVideoById(song.youtubeId);
-      } else {
-        setIsPlaying(false);
-        playerHandleRef.current?.cueVideoById(song.youtubeId);
-      }
-    },
-    []
-  );
-
-
-  const playSong = useCallback(
-    (song: Song, options?: PlaySongOptions) => {
-      const nextQueue = options?.queue ?? [song];
-      const slug = options?.playlistSlug ?? null;
-      const idx = nextQueue.findIndex((s) => s.id === song.id);
-      setExternalPlaylistId(null);
-      setExternalVideo(null);
-      setQueue(nextQueue);
-      setCurrentPlaylistSlug(slug);
-      goToIndex(nextQueue, idx === -1 ? 0 : idx, true);
-    },
-    [goToIndex]
-  );
-
-  const playPlaylist = useCallback(
-    (playlist: Playlist, startIndex = 0) => {
-      const nextQueue = getSongsForPlaylist(playlist);
-      setExternalPlaylistId(null);
-      setExternalVideo(null);
-      setQueue(nextQueue);
-      setCurrentPlaylistSlug(playlist.slug);
-      goToIndex(nextQueue, startIndex, true);
-    },
-    [goToIndex]
-  );
-
-  const playExternalPlaylist = useCallback((playlistId: string) => {
-    setQueue([]);
-    setQueueIndex(0);
-    setCurrentSong(null);
-    setCurrentPlaylistSlug(null);
-    setExternalVideo(null);
-    setExternalPlaylistId(playlistId);
     setCurrentTime(0);
     setDuration(0);
     setPlaybackUnavailable(false);
-    setIsLoading(true);
-    setIsPlaying(true);
-    playerHandleRef.current?.loadPlaylist(playlistId);
+    setQueueIndex(normalizedIndex);
+    setCurrentSong(song);
+    loadedSongIdRef.current = song.id;
+    setIsPlaying(autoplay);
+    if (autoplay) setIsLoading(true);
+    audioHandleRef.current?.load(song.audioUrl, autoplay);
   }, []);
 
-  const tuneIn = useCallback(() => {
+  const playQueue = useCallback(
+    (songs: Song[], category: CurrentCategory | null, startIndex = 0) => {
+      setQueue(songs);
+      setCurrentCategory(category);
+      goToIndex(songs, startIndex, true);
+    },
+    [goToIndex]
+  );
+
+  const tuneIn = useCallback(async () => {
     setHasTunedIn(true);
-    const rotation = getCurrentRotation();
-    const rotationSongs = getSongsForPlaylist(rotation);
-    const startIndex = getRadioStartingPosition(rotationSongs.length);
-    playPlaylist(rotation, startIndex);
-  }, [playPlaylist]);
+    try {
+      const categoryId = getCurrentCategoryId();
+      const songs = await fetchSongsByCategory(categoryId);
+      if (songs.length === 0) {
+        setPlaybackUnavailable(true);
+        return;
+      }
+      const startIndex = getRadioStartingPosition(songs.length);
+      playQueue(songs, { id: categoryId, name: songs[0].categoryName || categoryId }, startIndex);
+    } catch {
+      setPlaybackUnavailable(true);
+    }
+  }, [playQueue]);
 
   const play = useCallback(() => {
-    if (externalPlaylistId) {
-      playerHandleRef.current?.play();
-      setIsPlaying(true);
-      return;
-    }
     if (!currentSong) return;
-    if (loadedVideoIdRef.current === currentSong.youtubeId && !playbackUnavailable) {
-      playerHandleRef.current?.play();
+    if (loadedSongIdRef.current === currentSong.id && !playbackUnavailable) {
+      audioHandleRef.current?.play();
       setIsPlaying(true);
     } else {
       goToIndex(queue, queueIndex, true);
     }
-  }, [currentSong, playbackUnavailable, goToIndex, queue, queueIndex, externalPlaylistId]);
+  }, [currentSong, playbackUnavailable, goToIndex, queue, queueIndex]);
 
   const pause = useCallback(() => {
-    playerHandleRef.current?.pause();
+    audioHandleRef.current?.pause();
     setIsPlaying(false);
   }, []);
 
@@ -218,32 +154,22 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [isPlaying, play, pause]);
 
   const next = useCallback(() => {
-    if (externalPlaylistId) {
-      setIsLoading(true);
-      playerHandleRef.current?.nextVideo();
-      return;
-    }
     if (queue.length === 0) return;
     goToIndex(queue, queueIndex + 1, true);
-  }, [queue, queueIndex, goToIndex, externalPlaylistId]);
+  }, [queue, queueIndex, goToIndex]);
 
   const previous = useCallback(() => {
-    if (externalPlaylistId) {
-      setIsLoading(true);
-      playerHandleRef.current?.previousVideo();
-      return;
-    }
     if (queue.length === 0) return;
     if (currentTime > 5) {
-      playerHandleRef.current?.seekTo(0);
+      audioHandleRef.current?.seekTo(0);
       setCurrentTime(0);
       return;
     }
-    goToIndex(queue, queueIndex - 1, true, -1);
-  }, [queue, queueIndex, currentTime, goToIndex, externalPlaylistId]);
+    goToIndex(queue, queueIndex - 1, true);
+  }, [queue, queueIndex, currentTime, goToIndex]);
 
   const seek = useCallback((seconds: number) => {
-    playerHandleRef.current?.seekTo(seconds);
+    audioHandleRef.current?.seekTo(seconds);
     setCurrentTime(seconds);
   }, []);
 
@@ -251,59 +177,72 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const clamped = Math.min(100, Math.max(0, Math.round(nextVolume)));
     setVolumeState(clamped);
     setIsMuted(clamped === 0);
-    playerHandleRef.current?.setVolume(clamped);
+    audioHandleRef.current?.setVolume(clamped);
   }, []);
 
   const toggleMute = useCallback(() => {
     setIsMuted((prev) => {
       const nextMuted = !prev;
-      playerHandleRef.current?.setVolume(nextMuted ? 0 : volume || DEFAULT_VOLUME);
+      audioHandleRef.current?.setVolume(nextMuted ? 0 : volume || DEFAULT_VOLUME);
       return nextMuted;
     });
   }, [volume]);
 
-  // Restore playback preferences (but never auto-start audio). Deferred to
-  // a microtask so state updates happen in a callback rather than
-  // synchronously in the effect body.
+  // Restore playback preferences (but never auto-start audio). Restoring
+  // the previous song is instant (from localStorage); falling back to a
+  // fresh tune-in requires a Firestore round trip, so this effect is async.
   useEffect(() => {
     if (hasRestoredRef.current) return;
     hasRestoredRef.current = true;
     if (typeof window === "undefined") return;
 
-    queueMicrotask(() => {
+    (async () => {
       const savedVolume = window.localStorage.getItem(STORAGE_KEYS.volume);
       if (savedVolume) setVolumeState(Number(savedVolume));
 
       const savedTunedIn = window.localStorage.getItem(STORAGE_KEYS.tunedIn) === "true";
       setHasTunedIn(savedTunedIn);
 
-      const savedSongId = window.localStorage.getItem(STORAGE_KEYS.song);
-      const song = savedSongId ? getSongById(savedSongId) : undefined;
+      try {
+        const savedSongJson = window.localStorage.getItem(STORAGE_KEYS.song);
+        const savedQueueJson = window.localStorage.getItem(STORAGE_KEYS.queue);
 
-      if (song) {
-        const savedPlaylistSlug = window.localStorage.getItem(STORAGE_KEYS.playlist);
-        const savedPlaylist = savedPlaylistSlug ? getPlaylistBySlug(savedPlaylistSlug) : undefined;
-        const restoredQueue = savedPlaylist ? getSongsForPlaylist(savedPlaylist) : [song];
-        const idx = restoredQueue.findIndex((s) => s.id === song.id);
+        if (savedSongJson && savedQueueJson) {
+          const song: Song = JSON.parse(savedSongJson);
+          const restoredQueue: Song[] = JSON.parse(savedQueueJson);
+          const savedCategoryJson = window.localStorage.getItem(STORAGE_KEYS.category);
+          const category: CurrentCategory | null = savedCategoryJson
+            ? JSON.parse(savedCategoryJson)
+            : null;
+          const idx = restoredQueue.findIndex((s) => s.id === song.id);
 
-        setQueue(restoredQueue);
-        setQueueIndex(idx === -1 ? 0 : idx);
-        setCurrentPlaylistSlug(savedPlaylist?.slug ?? null);
-        setCurrentSong(song);
-        return;
+          setQueue(restoredQueue);
+          setCurrentCategory(category);
+          goToIndex(restoredQueue, idx === -1 ? 0 : idx, false);
+          return;
+        }
+      } catch {
+        // Corrupt/incompatible saved state — fall through to a fresh tune-in.
       }
 
-      // Nothing saved (first-ever visit) — cue up the current rotation so
-      // the player bar shows up ready to go instead of a bare "tune in"
-      // prompt. Cueing doesn't need a user gesture; only playVideo() does,
-      // which the visible Play button provides.
-      const rotation = getCurrentRotation();
-      const rotationSongs = getSongsForPlaylist(rotation);
-      const startIndex = getRadioStartingPosition(rotationSongs.length);
-      setQueue(rotationSongs);
-      setCurrentPlaylistSlug(rotation.slug);
-      goToIndex(rotationSongs, startIndex, false);
-    });
+      // Nothing usable saved (first-ever visit) — cue up the current
+      // rotation so the player bar shows up ready to go instead of a bare
+      // "tune in" prompt. Cueing doesn't need a user gesture; only
+      // play() does, which the visible Play button provides.
+      try {
+        const categoryId = getCurrentCategoryId();
+        const songs = await fetchSongsByCategory(categoryId);
+        if (songs.length > 0) {
+          const startIndex = getRadioStartingPosition(songs.length);
+          setQueue(songs);
+          setCurrentCategory({ id: categoryId, name: songs[0].categoryName || categoryId });
+          goToIndex(songs, startIndex, false);
+        }
+      } catch {
+        // Network error on first load — leave the "Tap to Tune In" prompt
+        // as-is; tuneIn() will retry and surface playbackUnavailable.
+      }
+    })();
   }, [goToIndex]);
 
   // Only one browser tab should play audio at a time. When this tab starts
@@ -327,6 +266,28 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     };
   }, [pause]);
 
+  // Mobile browsers/OSes can silently suspend backgrounded audio even with
+  // the mitigations in NativeAudioPlayer. Remember whether we were supposed
+  // to be playing, and resume automatically the moment the tab becomes
+  // visible again instead of leaving playback stuck paused.
+  const wasPlayingRef = useRef(false);
+  useEffect(() => {
+    wasPlayingRef.current = isPlaying;
+  }, [isPlaying]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible" && wasPlayingRef.current) {
+        play();
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [play]);
+
   // Persist preferences.
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -340,19 +301,20 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (typeof window === "undefined" || !currentSong) return;
-    window.localStorage.setItem(STORAGE_KEYS.song, currentSong.id);
-    if (currentPlaylistSlug) {
-      window.localStorage.setItem(STORAGE_KEYS.playlist, currentPlaylistSlug);
+    window.localStorage.setItem(STORAGE_KEYS.song, JSON.stringify(currentSong));
+    window.localStorage.setItem(STORAGE_KEYS.queue, JSON.stringify(queue));
+    if (currentCategory) {
+      window.localStorage.setItem(STORAGE_KEYS.category, JSON.stringify(currentCategory));
     } else {
-      window.localStorage.removeItem(STORAGE_KEYS.playlist);
+      window.localStorage.removeItem(STORAGE_KEYS.category);
     }
-  }, [currentSong, currentPlaylistSlug]);
+  }, [currentSong, queue, currentCategory]);
 
   // Poll playback progress while playing.
   useEffect(() => {
     if (!isPlaying) return;
     const interval = window.setInterval(() => {
-      const handle = playerHandleRef.current;
+      const handle = audioHandleRef.current;
       if (!handle) return;
       setCurrentTime(handle.getCurrentTime());
       const d = handle.getDuration();
@@ -385,32 +347,17 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [togglePlay, seek, currentTime, duration]);
 
   // Media Session: lock-screen / notification "Now Playing" controls. Also
-  // signals to the OS that this tab is actively playing media, which on
-  // Android keeps audio going when the app is backgrounded (iOS Safari
-  // still suspends cross-origin iframe video in the background regardless).
+  // signals to the OS that this tab is actively playing media, which is
+  // what lets Android/iOS keep same-origin <audio> playback going when the
+  // app is backgrounded.
   useEffect(() => {
-    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) return;
-
-    const title = externalVideo?.title ?? currentSong?.titleEnglish ?? "Desi Mahol";
-    const artist = externalVideo?.author ?? currentSong?.artist ?? "Desi Mahol";
-    const videoId = externalVideo?.videoId ?? currentSong?.youtubeId;
-    const artwork = videoId
-      ? [
-          {
-            src: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
-            sizes: "480x360",
-            type: "image/jpeg",
-          },
-        ]
-      : [];
-
+    if (typeof navigator === "undefined" || !("mediaSession" in navigator) || !currentSong) return;
     navigator.mediaSession.metadata = new MediaMetadata({
-      title,
-      artist,
-      album: "Desi Mahol",
-      artwork,
+      title: currentSong.title,
+      artist: currentSong.artist ?? "Desi Mahol",
+      album: currentSong.categoryName || "Desi Mahol",
     });
-  }, [currentSong, externalVideo]);
+  }, [currentSong]);
 
   useEffect(() => {
     if (typeof navigator === "undefined" || !("mediaSession" in navigator)) return;
@@ -434,9 +381,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     };
   }, [play, pause, previous, next]);
 
-  const handleReady = useCallback(() => {
-    setIsReady(true);
-    playerHandleRef.current?.setVolume(volume);
+  useEffect(() => {
+    audioHandleRef.current?.setVolume(volume);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -446,13 +392,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     setPlaybackUnavailable(false);
     skipAttemptsRef.current = 0;
     playbackChannelRef.current?.postMessage({ type: "playing", tabId: tabIdRef.current });
-    if (externalPlaylistId) {
-      const data = playerHandleRef.current?.getVideoData();
-      if (data) {
-        setExternalVideo({ videoId: data.video_id, title: data.title, author: data.author });
-      }
-    }
-  }, [externalPlaylistId]);
+  }, []);
 
   const handlePaused = useCallback(() => {
     setIsPlaying(false);
@@ -460,35 +400,24 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const handleEnded = useCallback(() => {
     skipAttemptsRef.current = 0;
-    // YouTube advances its own playlist internally on ended.
-    if (externalPlaylistId) return;
     goToIndex(queue, queueIndex + 1, true);
-  }, [queue, queueIndex, goToIndex, externalPlaylistId]);
+  }, [queue, queueIndex, goToIndex]);
 
   const handleError = useCallback(() => {
     skipAttemptsRef.current += 1;
     setIsLoading(false);
-    if (externalPlaylistId) {
-      if (skipAttemptsRef.current > 20) {
-        setIsPlaying(false);
-        setPlaybackUnavailable(true);
-        return;
-      }
-      playerHandleRef.current?.nextVideo();
-      return;
-    }
     if (skipAttemptsRef.current > Math.max(queue.length, 1)) {
       setIsPlaying(false);
       setPlaybackUnavailable(true);
       return;
     }
     goToIndex(queue, queueIndex + 1, true);
-  }, [queue, queueIndex, goToIndex, externalPlaylistId]);
+  }, [queue, queueIndex, goToIndex]);
 
   const value = useMemo<PlayerContextValue>(
     () => ({
       currentSong,
-      currentPlaylist,
+      currentCategory,
       isPlaying,
       isLoading,
       isReady,
@@ -499,12 +428,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       isMuted,
       queue,
       playbackUnavailable,
-      externalPlaylistId,
-      externalVideo,
       tuneIn,
-      playSong,
-      playPlaylist,
-      playExternalPlaylist,
+      playQueue,
       play,
       pause,
       togglePlay,
@@ -516,7 +441,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }),
     [
       currentSong,
-      currentPlaylist,
+      currentCategory,
       isPlaying,
       isLoading,
       isReady,
@@ -527,12 +452,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       isMuted,
       queue,
       playbackUnavailable,
-      externalPlaylistId,
-      externalVideo,
       tuneIn,
-      playSong,
-      playPlaylist,
-      playExternalPlaylist,
+      playQueue,
       play,
       pause,
       togglePlay,
@@ -547,9 +468,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   return (
     <PlayerContext.Provider value={value}>
       {children}
-      <YouTubePlayer
-        ref={playerHandleRef}
-        onReady={handleReady}
+      <NativeAudioPlayer
+        ref={audioHandleRef}
         onPlaying={handlePlaying}
         onPaused={handlePaused}
         onEnded={handleEnded}

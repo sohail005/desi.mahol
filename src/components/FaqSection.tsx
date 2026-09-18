@@ -12,17 +12,17 @@ const faqs = [
   {
     question: "What kind of music plays on Desi Mahol?",
     answer:
-      "Desi Mahol plays old, evergreen Hindi songs across curated rotations like Happy & Sunday, Desimahol Classics, 90s Hit and Highway Specials.",
+      "Old, evergreen Hindi songs organised into moods — Happy, Sad, Love, Travel, Driving, Working, Cooking, Relax and Mix — so you can pick whatever fits the moment.",
   },
   {
     question: "How does the rotation work?",
     answer:
-      "The playlist that's \"on air\" changes automatically with the time of day (IST) — a different rotation plays through mornings, afternoons, evenings and late night.",
+      "Tap to Tune In and the mood \"on air\" changes automatically with the time of day (IST) — a different one plays through mornings, afternoons, evenings and late night.",
   },
   {
-    question: "Can I pick a specific playlist or song?",
+    question: "Can I pick a specific mood or playlist?",
     answer:
-      "Yes. Browse the Playlists page for the day's rotations, or the Songs page for the full catalogue, and play anything directly.",
+      "Yes. Use the Mood button to pick a specific vibe, or the Playlists button to shuffle every song on the site.",
   },
 ];
 

@@ -1,6 +1,22 @@
-import { playlists } from "@/data/playlists";
-import type { Playlist } from "@/types/music";
 import { getISTHour } from "@/lib/time";
+
+interface RotationSlot {
+  categoryId: string;
+  startHour: number;
+  endHour: number;
+}
+
+/**
+ * Time-of-day → category schedule for "Tap to Tune In" (Asia/Kolkata).
+ * Same hour boundaries as the old hardcoded rotation playlists, just
+ * retargeted at Firebase categories instead of static song lists.
+ */
+const ROTATION_SCHEDULE: RotationSlot[] = [
+  { categoryId: "happy", startHour: 5, endHour: 9 },
+  { categoryId: "mix", startHour: 9, endHour: 18 },
+  { categoryId: "sad", startHour: 18, endHour: 22 },
+  { categoryId: "travel", startHour: 22, endHour: 5 },
+];
 
 /**
  * Whether `hour` falls inside [startHour, endHour), handling ranges that
@@ -16,22 +32,22 @@ export function isHourInRotation(hour: number, startHour: number, endHour: numbe
 }
 
 /**
- * Returns the playlist that should be "on air" right now, based on the
- * current hour in Asia/Kolkata. Falls back to the first playlist if the
+ * Returns the category that should be "on air" right now, based on the
+ * current hour in Asia/Kolkata. Falls back to the first slot if the
  * schedule somehow leaves a gap.
  */
-export function getCurrentRotation(date: Date = new Date()): Playlist {
+export function getCurrentCategoryId(date: Date = new Date()): string {
   const hour = getISTHour(date);
-  const active = playlists.find((playlist) =>
-    isHourInRotation(hour, playlist.startHour, playlist.endHour)
+  const active = ROTATION_SCHEDULE.find((slot) =>
+    isHourInRotation(hour, slot.startHour, slot.endHour)
   );
-  return active ?? playlists[0];
+  return active?.categoryId ?? ROTATION_SCHEDULE[0].categoryId;
 }
 
 /**
- * Deterministic "radio" starting index into a playlist based on the
- * current IST hour and minute, so tuning in twice within the same minute
- * lands on the same song, but different times of day vary the start.
+ * Deterministic "radio" starting index into a queue based on the current
+ * IST hour and minute, so tuning in twice within the same minute lands on
+ * the same song, but different times of day vary the start.
  */
 export function getRadioStartingPosition(songCount: number, date: Date = new Date()): number {
   if (songCount <= 0) return 0;

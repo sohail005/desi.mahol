@@ -1,17 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, Palette } from "lucide-react";
+import { ChevronDown, Loader2, Palette } from "lucide-react";
 import { useRadio } from "@/hooks/useRadio";
-import { getPlaylistBySlug } from "@/lib/catalogue";
-import { songs } from "@/data/songs";
+import { fetchSongsByCategory } from "@/lib/firebase/songs";
 import { themes, type Theme } from "@/data/themes";
-
-interface ThemeSelectorProps {
-  activeThemeId: string | null;
-  onThemeChange: (theme: Theme) => void;
-  className?: string;
-}
 
 function shuffle<T>(items: T[]): T[] {
   const copy = [...items];
@@ -22,13 +15,21 @@ function shuffle<T>(items: T[]): T[] {
   return copy;
 }
 
+interface ThemeSelectorProps {
+  activeThemeId: string | null;
+  onThemeChange: (theme: Theme) => void;
+  className?: string;
+}
+
 export default function ThemeSelector({
   activeThemeId,
   onThemeChange,
   className = "",
 }: ThemeSelectorProps) {
-  const { playPlaylist, playSong, playExternalPlaylist } = useRadio();
+  const { playQueue } = useRadio();
   const [isOpen, setIsOpen] = useState(false);
+  const [loadingThemeId, setLoadingThemeId] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
 
   const activeTheme = themes.find((theme) => theme.id === activeThemeId) ?? null;
@@ -51,25 +52,30 @@ export default function ThemeSelector({
     };
   }, [isOpen]);
 
-  function handleSelect(theme: Theme) {
+  useEffect(() => {
+    if (!statusMessage) return;
+    const timeout = window.setTimeout(() => setStatusMessage(null), 3000);
+    return () => window.clearTimeout(timeout);
+  }, [statusMessage]);
+
+  async function handleSelect(theme: Theme) {
     onThemeChange(theme);
     setIsOpen(false);
+    setLoadingThemeId(theme.id);
+    setStatusMessage(null);
 
-    if (theme.youtubePlaylistId) {
-      playExternalPlaylist(theme.youtubePlaylistId);
-      return;
-    }
-
-    if (theme.playlistSlug === null) {
-      const shuffled = shuffle(songs);
-      if (shuffled.length > 0) {
-        playSong(shuffled[0], { queue: shuffled, playlistSlug: null });
+    try {
+      const songs = await fetchSongsByCategory(theme.id);
+      if (songs.length === 0) {
+        setStatusMessage(`No songs in "${theme.label}" yet.`);
+        return;
       }
-      return;
+      playQueue(shuffle(songs), { id: theme.id, name: theme.label });
+    } catch {
+      setStatusMessage("Couldn't load that mood — check your connection.");
+    } finally {
+      setLoadingThemeId(null);
     }
-
-    const playlist = getPlaylistBySlug(theme.playlistSlug);
-    if (playlist) playPlaylist(playlist);
   }
 
   return (
@@ -81,8 +87,13 @@ export default function ThemeSelector({
         aria-expanded={isOpen}
         className="liquid-glass flex h-8 w-full items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-white sm:text-sm"
       >
-        {activeTheme ? (
-          <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center text-sm leading-none" aria-hidden="true">
+        {loadingThemeId ? (
+          <Loader2 size={14} className="shrink-0 animate-spin text-white/80" aria-hidden="true" />
+        ) : activeTheme ? (
+          <span
+            className="flex h-3.5 w-3.5 shrink-0 items-center justify-center text-sm leading-none"
+            aria-hidden="true"
+          >
             {activeTheme.emoji}
           </span>
         ) : (
@@ -94,6 +105,12 @@ export default function ThemeSelector({
           className={`ml-auto shrink-0 text-white/60 transition-transform ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
+
+      {statusMessage && (
+        <p className="liquid-glass absolute top-full left-1/2 z-40 mt-2 w-max max-w-56 -translate-x-1/2 rounded-xl px-3 py-2 text-center text-xs text-white/90">
+          {statusMessage}
+        </p>
+      )}
 
       {isOpen && (
         <div

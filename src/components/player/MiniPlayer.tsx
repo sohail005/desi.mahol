@@ -9,15 +9,13 @@ import PlayerControls from "@/components/player/PlayerControls";
  * RadioPlayer bar inside it) has scrolled out of view.
  */
 export default function MiniPlayer() {
-  const { currentSong, hasTunedIn, isLoading, externalPlaylistId, externalVideo } = useRadio();
+  const { currentSong, hasTunedIn, isLoading } = useRadio();
   const scrolledPastHero = useScrolledPastHero();
 
-  const hasActivePlayer = hasTunedIn || !!currentSong || !!externalPlaylistId;
+  const hasActivePlayer = hasTunedIn || !!currentSong;
   if (!hasActivePlayer || !scrolledPastHero) return null;
 
-  const title = externalPlaylistId
-    ? (externalVideo?.title ?? "Mood Radio")
-    : (currentSong?.titleEnglish ?? "Nothing tuned in yet");
+  const title = currentSong?.title ?? "Nothing tuned in yet";
 
   return (
     <div className="liquid-glass-card fixed top-4 right-4 z-40 flex max-w-[min(90vw,20rem)] items-center gap-2 rounded-full py-1.5 pr-2 pl-4 shadow-lg">

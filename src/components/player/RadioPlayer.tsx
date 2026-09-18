@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Radio, Share2 } from "lucide-react";
 import { useRadio } from "@/hooks/useRadio";
-import { isPlaceholderYoutubeId } from "@/lib/youtube";
 import PlayerControls from "@/components/player/PlayerControls";
 import PlayerProgress from "@/components/player/PlayerProgress";
 import PlayerVolume from "@/components/player/PlayerVolume";
@@ -41,16 +40,8 @@ function fallbackCopy(text: string): boolean {
 }
 
 export default function RadioPlayer() {
-  const {
-    currentSong,
-    isPlaying,
-    hasTunedIn,
-    isLoading,
-    playbackUnavailable,
-    tuneIn,
-    externalPlaylistId,
-    externalVideo,
-  } = useRadio();
+  const { currentSong, isPlaying, hasTunedIn, isLoading, playbackUnavailable, tuneIn } =
+    useRadio();
   const [shareMessage, setShareMessage] = useState<string | null>(null);
 
   async function handleShare() {
@@ -78,7 +69,7 @@ export default function RadioPlayer() {
     window.setTimeout(() => setShareMessage(null), 2000);
   }
 
-  if (!hasTunedIn && !currentSong && !externalPlaylistId) {
+  if (!hasTunedIn && !currentSong) {
     return (
       <div className="absolute inset-x-3 top-[76%] z-40 -translate-y-1/2 sm:inset-x-6">
         <button
@@ -92,10 +83,6 @@ export default function RadioPlayer() {
       </div>
     );
   }
-
-  const hasThumbnail =
-    (currentSong && !isPlaceholderYoutubeId(currentSong.youtubeId)) || !!externalVideo?.videoId;
-  const thumbnailVideoId = currentSong?.youtubeId ?? externalVideo?.videoId;
 
   return (
     <div
@@ -130,37 +117,23 @@ export default function RadioPlayer() {
             }`}
             aria-hidden="true"
           >
-            {hasThumbnail ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={`https://i.ytimg.com/vi/${thumbnailVideoId}/default.jpg`}
-                alt=""
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <span className="liquid-glass flex h-full w-full items-center justify-center text-accent">
-                <Radio size={16} />
-              </span>
-            )}
+            <span className="liquid-glass flex h-full w-full items-center justify-center text-accent">
+              <Radio size={16} />
+            </span>
           </span>
 
           <div className="min-w-0 flex-1">
-            {externalPlaylistId ? (
+            {currentSong ? (
               <>
                 <p className="truncate text-[18px] font-semibold text-white sm:text-[20px]">
-                  {externalVideo?.title ?? "Mood Radio"}
+                  {currentSong.title}
                 </p>
                 <p className="truncate text-[16px] text-white/50">
-                  {isLoading ? "Tuning in…" : externalVideo?.author}
-                </p>
-              </>
-            ) : currentSong ? (
-              <>
-                <p className="truncate text-[18px] font-semibold text-white sm:text-[20px]">
-                  {currentSong.titleEnglish}
-                </p>
-                <p className="truncate text-[16px] text-white/50">
-                  {isLoading ? "Tuning in…" : `Credits: ${currentSong.artist}`}
+                  {isLoading
+                    ? "Tuning in…"
+                    : currentSong.artist
+                      ? `Credits: ${currentSong.artist}`
+                      : currentSong.categoryName}
                 </p>
               </>
             ) : (
@@ -175,12 +148,12 @@ export default function RadioPlayer() {
           </div>
         </div>
 
-        {(externalPlaylistId || currentSong) && <PlayerProgress />}
+        {currentSong && <PlayerProgress />}
       </div>
 
       {playbackUnavailable && (
         <p className="mx-auto mt-2 max-w-2xl text-center text-[16px] text-amber-400">
-          This track isn&apos;t available yet — add a YouTube ID to hear it.
+          Couldn&apos;t load a track right now — check your connection and try again.
         </p>
       )}
     </div>

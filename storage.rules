@@ -1,0 +1,16 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Layout: songs/{categoryId}/{songId}.mp3 (see src/lib/firebase/songs.ts)
+    match /songs/{categoryId}/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.token.admin == true
+        && request.resource.size < 15 * 1024 * 1024
+        && request.resource.contentType.matches('audio/.*');
+      allow delete: if request.auth != null && request.auth.token.admin == true;
+    }
+  }
+}
