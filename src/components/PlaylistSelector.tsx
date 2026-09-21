@@ -48,7 +48,7 @@ export default function PlaylistSelector({ className = "" }: { className?: strin
         type="button"
         onClick={handleShuffleAll}
         disabled={isLoading}
-        className="liquid-glass flex w-full items-center gap-1.5 rounded-full px-3 py-1.5 text-[14px] font-semibold text-white disabled:opacity-60"
+        className="liquid-glass flex w-full items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[12.5px] font-semibold whitespace-nowrap text-white disabled:opacity-60 sm:px-3 sm:text-[14px]"
       >
         {isLoading ? (
           <Loader2 size={14} className="shrink-0 animate-spin text-white/80" aria-hidden="true" />

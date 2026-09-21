@@ -12,7 +12,7 @@ import RadioPlayer from "@/components/player/RadioPlayer";
 
 const DEFAULT_OVERLAY = "linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.8) 100%)";
 const DEFAULT_DESKTOP_IMAGE = "/images/desimahol3.webp";
-const DEFAULT_MOBILE_IMAGE = "/images/desimahol-mobile-hero.jpg";
+const DEFAULT_MOBILE_IMAGE = "/images/heromobile.webp";
 
 // Hidden below sm — for nav items tucked into the mobile hamburger menu
 // instead of sitting in the always-visible top bar.
@@ -140,7 +140,7 @@ export default function Hero() {
         </>
       )}
 
-      <div className="relative z-10 mt-8 flex flex-1 flex-col px-4 text-center sm:mt-30 sm:px-6">
+      <div className="relative z-10 flex flex-1 flex-col px-4 text-center sm:mt-30 sm:px-6">
         <div className="liquid-glass-card mx-auto flex flex-col rounded-2xl px-5 py-4 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:shadow-none sm:backdrop-blur-none">
           <p className="font-devanagari text-4xl leading-none font-bold text-white drop-shadow-lg sm:text-8xl">
             Desi Mahol

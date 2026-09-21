@@ -89,23 +89,23 @@ export default function RadioPlayer() {
     <div
       role="region"
       aria-label="Now playing"
-      className="absolute inset-x-3 top-[76%] z-40 -translate-y-1/2 sm:inset-x-6"
+      className="absolute inset-x-3 top-[68%] z-40 -translate-y-1/2 sm:inset-x-6"
     >
-      <div className="relative mx-auto flex w-fit items-center justify-center gap-2">
-        <CategorySelector className="w-auto" />
-        <PlaylistSelector className="w-auto" />
+      <div className="relative mx-auto flex w-full max-w-2xl flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+        <CategorySelector className="w-auto shrink-0" />
+        <PlaylistSelector className="w-auto shrink-0" />
         <RainEffect />
         <button
           type="button"
           onClick={handleShare}
-          className="liquid-glass flex items-center gap-2 rounded-full px-4 py-1.5 text-[16px] text-white/95"
+          className="liquid-glass flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] whitespace-nowrap text-white/95 sm:gap-2 sm:px-4 sm:text-[16px]"
         >
           <Share2 size={13} />
           Share
         </button>
 
         {shareMessage && (
-          <p className="liquid-glass absolute bottom-full left-1/2 mb-2 -translate-x-1/2 rounded-full px-3 py-1.5 text-[16px] whitespace-nowrap text-white/90">
+          <p className="liquid-glass absolute bottom-full left-1/2 mb-2 -translate-x-1/2 rounded-full px-3 py-1.5 text-[14px] whitespace-nowrap text-white/90 sm:text-[16px]">
             {shareMessage}
           </p>
         )}

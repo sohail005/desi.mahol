@@ -78,7 +78,7 @@ export default function CategorySelector({ className = "" }: { className?: strin
         onClick={() => setIsOpen((prev) => !prev)}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        className="liquid-glass flex w-full items-center gap-1.5 rounded-full px-3 py-1.5 text-[14px] font-semibold text-white"
+        className="liquid-glass flex w-full items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[12.5px] font-semibold whitespace-nowrap text-white sm:px-3 sm:text-[14px]"
       >
         {loadingId ? (
           <Loader2 size={14} className="shrink-0 animate-spin text-white/80" aria-hidden="true" />

@@ -49,7 +49,7 @@ export default function SupportModal({ onClose }: SupportModalProps) {
 
         <div className="mx-auto mt-5 flex h-44 w-44 items-center justify-center overflow-hidden rounded-xl border border-amber-500/30 bg-white p-2">
           <Image
-            src="/images/desimaholqr.jpg"
+            src="/images/desimaholqr.webp"
             alt="Desi Mahol UPI QR code"
             width={200}
             height={200}
@@ -59,7 +59,7 @@ export default function SupportModal({ onClose }: SupportModalProps) {
         <p className="mt-2 text-[16px] text-white/40">QR code to support Desi Mahol</p>
 
         <a
-          href="/images/desimaholqr.jpg"
+          href="/images/desimaholqr.webp"
           download="desi-mahol-qr.jpg"
           className="mt-4 inline-block text-[16px] font-semibold text-amber-400 underline decoration-amber-500/40 hover:text-amber-300"
         >
