@@ -82,7 +82,7 @@ export default function CategoryManager({
           {isDropdownOpen && (
             <div
               role="listbox"
-              className="liquid-glass-card no-scrollbar absolute top-full left-0 z-40 mt-2 flex max-h-60 w-full flex-col gap-0.5 overflow-y-auto rounded-2xl bg-black/90 p-1.5"
+              className="liquid-glass-card no-scrollbar absolute bottom-full left-0 z-40 mb-2 flex max-h-60 w-full flex-col gap-0.5 overflow-y-auto rounded-2xl bg-black/90 p-1.5"
             >
               {categories.map((category) => (
                 <button

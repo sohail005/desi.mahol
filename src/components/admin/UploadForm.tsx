@@ -112,7 +112,7 @@ export default function UploadForm({
         }`}
       >
         <UploadCloud size={22} className="text-white/60" />
-        <p className="text-sm text-white/70">
+        <p className={`text-sm ${file ? "font-medium text-green-400" : "text-white/70"}`}>
           {file ? file.name : "Drag & drop an MP3 here, or click to browse"}
         </p>
         <input
