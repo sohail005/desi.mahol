@@ -203,11 +203,6 @@ export default function RainEffect() {
       }, 50);
 
       playThunderSound();
-
-      lightningTimeoutRef.current = window.setTimeout(
-        triggerLightning,
-        6000 + Math.random() * 9000,
-      );
     }
 
     function animate() {
@@ -299,7 +294,7 @@ export default function RainEffect() {
       if (audioCtx && rainGain) {
         rainGain.gain.cancelScheduledValues(audioCtx.currentTime);
         rainGain.gain.setValueAtTime(rainGain.gain.value, audioCtx.currentTime);
-        rainGain.gain.linearRampToValueAtTime(0.12, audioCtx.currentTime + 1.2);
+        rainGain.gain.linearRampToValueAtTime(0.18, audioCtx.currentTime + 1.2);
       }
 
       const { width, height } = sizeRef.current;

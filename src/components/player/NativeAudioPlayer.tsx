@@ -37,11 +37,20 @@ const NativeAudioPlayer = forwardRef<NativeAudioPlayerHandle, NativeAudioPlayerP
         audio.src = src;
         audio.load();
         if (autoplay) {
-          audio.play().catch(() => onError?.());
+          audio.play().catch((error) => {
+            // A newer load()/pause() call interrupting this one rejects
+            // the play() promise with AbortError — expected noise when
+            // switching songs quickly, not a real playback failure.
+            if (error instanceof DOMException && error.name === "AbortError") return;
+            onError?.();
+          });
         }
       },
       play() {
-        audioRef.current?.play().catch(() => onError?.());
+        audioRef.current?.play().catch((error) => {
+          if (error instanceof DOMException && error.name === "AbortError") return;
+          onError?.();
+        });
       },
       pause() {
         audioRef.current?.pause();
@@ -69,7 +78,14 @@ const NativeAudioPlayer = forwardRef<NativeAudioPlayerHandle, NativeAudioPlayerP
         onPlaying={() => onPlaying?.()}
         onPause={() => onPaused?.()}
         onEnded={() => onEnded?.()}
-        onError={() => onError?.()}
+        onError={(event) => {
+          // A newer load() interrupting an in-flight fetch for the
+          // previous song reports MEDIA_ERR_ABORTED here — expected noise
+          // when switching songs quickly, not a real playback failure.
+          const error = event.currentTarget.error;
+          if (error?.code === MediaError.MEDIA_ERR_ABORTED) return;
+          onError?.();
+        }}
         className="hidden"
       />
     );
