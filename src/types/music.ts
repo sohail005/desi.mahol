@@ -12,6 +12,8 @@ export interface Song {
   categoryName: string;
   /** Realtime Database path holding the base64-encoded audio (see src/lib/firebase/songs.ts). */
   audioPath: string;
+  /** Realtime Database path holding the base64-encoded cover art extracted from the file's ID3 tags, if any. */
+  thumbnailPath: string | null;
   duration: number | null;
   createdAt: number; // epoch ms
   createdBy: string;

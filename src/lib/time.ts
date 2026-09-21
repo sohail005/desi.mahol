@@ -41,11 +41,3 @@ export function formatDuration(seconds: number): string {
   }
   return `${minutes}:${String(secs).padStart(2, "0")}`;
 }
-
-/**
- * Formats an hour range like "22:00–05:00 IST".
- */
-export function formatRotationHours(startHour: number, endHour: number): string {
-  const fmt = (h: number) => `${String(h % 24).padStart(2, "0")}:00`;
-  return `${fmt(startHour)}–${fmt(endHour)} IST`;
-}

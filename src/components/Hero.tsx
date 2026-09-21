@@ -7,10 +7,8 @@ import { formatISTClock } from "@/lib/time";
 import { useOnlineCount } from "@/hooks/useOnlineCount";
 import SupportModal from "@/components/SupportModal";
 import InstallAppButton from "@/components/InstallAppButton";
-import ThemeSelector from "@/components/ThemeSelector";
 import PlaylistSelector from "@/components/PlaylistSelector";
 import RadioPlayer from "@/components/player/RadioPlayer";
-import { useThemeContext } from "@/context/ThemeContext";
 
 const DEFAULT_OVERLAY = "linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.8) 100%)";
 const DEFAULT_DESKTOP_IMAGE = "/images/desimahol3.webp";
@@ -44,12 +42,11 @@ export default function Hero() {
   const onlineCount = useOnlineCount();
   const [isSupportOpen, setIsSupportOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { activeTheme, setActiveTheme } = useThemeContext();
 
   return (
     <section className="relative flex min-h-screen w-full flex-col overflow-hidden">
       <Image
-        src={activeTheme?.imageDesktop ?? DEFAULT_DESKTOP_IMAGE}
+        src={DEFAULT_DESKTOP_IMAGE}
         alt="Desi Mahol — nostalgic Hindi radio"
         fill
         priority
@@ -58,7 +55,7 @@ export default function Hero() {
         className="hidden object-cover sm:block"
       />
       <Image
-        src={activeTheme?.imageMobile ?? DEFAULT_MOBILE_IMAGE}
+        src={DEFAULT_MOBILE_IMAGE}
         alt="Desi Mahol — nostalgic Hindi radio"
         fill
         priority
@@ -67,8 +64,8 @@ export default function Hero() {
         className="object-cover sm:hidden"
       />
       <div
-        className="absolute inset-0 transition-[background] duration-700"
-        style={{ background: activeTheme?.overlay ?? DEFAULT_OVERLAY }}
+        className="absolute inset-0"
+        style={{ background: DEFAULT_OVERLAY }}
       />
 
       <div className="relative z-30 grid grid-cols-[auto_1fr_auto] items-center gap-2 px-4 py-4 sm:gap-4 sm:px-6 sm:py-6">
@@ -91,7 +88,6 @@ export default function Hero() {
           </a>
           <InstallAppButton className={`${GLASS_LINK_DESKTOP_ONLY} gap-1.5`} />
           {/* <PlaylistSelector /> */}
-          <ThemeSelector activeThemeId={activeTheme?.id ?? null} onThemeChange={setActiveTheme} />
           <button
             type="button"
             onClick={() => setIsSupportOpen(true)}

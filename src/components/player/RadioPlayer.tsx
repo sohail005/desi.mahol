@@ -8,6 +8,7 @@ import PlayerProgress from "@/components/player/PlayerProgress";
 import PlayerVolume from "@/components/player/PlayerVolume";
 import RainEffect from "@/components/RainEffect";
 import PlaylistSelector from "@/components/PlaylistSelector";
+import CategorySelector from "@/components/CategorySelector";
 
 function copyToClipboard(text: string): boolean {
   if (typeof navigator !== "undefined" && navigator.clipboard) {
@@ -91,6 +92,7 @@ export default function RadioPlayer() {
       className="absolute inset-x-3 top-[76%] z-40 -translate-y-1/2 sm:inset-x-6"
     >
       <div className="relative mx-auto flex w-fit items-center justify-center gap-2">
+        <CategorySelector className="w-auto" />
         <PlaylistSelector className="w-auto" />
         <RainEffect />
         <button

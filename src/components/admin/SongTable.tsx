@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Search, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Music, Search, Trash2 } from "lucide-react";
 import type { Song } from "@/types/music";
+import { fetchSongThumbnail } from "@/lib/firebase/songs";
 
 interface SongTableProps {
   songs: Song[];
@@ -15,6 +16,36 @@ function formatDuration(seconds: number | null): string {
   const mins = Math.floor(seconds / 60);
   const secs = Math.round(seconds % 60);
   return `${mins}:${secs.toString().padStart(2, "0")}`;
+}
+
+function SongThumbnail({ thumbnailPath }: { thumbnailPath: string | null }) {
+  const [src, setSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!thumbnailPath) {
+      setSrc(null);
+      return;
+    }
+    fetchSongThumbnail(thumbnailPath).then((dataUri) => {
+      if (!cancelled) setSrc(dataUri);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [thumbnailPath]);
+
+  if (!src) {
+    return (
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white/40">
+        <Music size={14} />
+      </div>
+    );
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- data: URI, not an optimizable remote/static asset
+    <img src={src} alt="" className="h-9 w-9 shrink-0 rounded-lg object-cover" />
+  );
 }
 
 export default function SongTable({ songs, isLoading, onDelete }: SongTableProps) {
@@ -73,6 +104,7 @@ export default function SongTable({ songs, isLoading, onDelete }: SongTableProps
           <table className="w-full min-w-[480px] text-left text-sm">
             <thead>
               <tr className="border-b border-white/10 text-xs text-white/40 uppercase">
+                <th className="py-2 pr-3 font-medium" />
                 <th className="py-2 pr-3 font-medium">Title</th>
                 <th className="py-2 pr-3 font-medium">Category</th>
                 <th className="py-2 pr-3 font-medium">Duration</th>
@@ -82,6 +114,9 @@ export default function SongTable({ songs, isLoading, onDelete }: SongTableProps
             <tbody>
               {filtered.map((song) => (
                 <tr key={song.id} className="border-b border-white/5 last:border-0">
+                  <td className="py-2.5 pr-3">
+                    <SongThumbnail thumbnailPath={song.thumbnailPath} />
+                  </td>
                   <td className="py-2.5 pr-3">
                     <p className="font-medium text-white">{song.title}</p>
                     {song.artist && <p className="text-xs text-white/40">{song.artist}</p>}

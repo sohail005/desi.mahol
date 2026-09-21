@@ -2,7 +2,7 @@ const faqs = [
   {
     question: "What is Desi Mahol?",
     answer:
-      "Desi Mahol is a free ambient Hindi radio website that recreates the sound of an old shop radio — nonstop, timeless Hindi songs organised into rotations that change through the day.",
+      "Desi Mahol is a free ambient Hindi radio website that recreates the sound of an old shop radio — nonstop, timeless Hindi songs, shuffled and playing all day.",
   },
   {
     question: "Is Desi Mahol free to use?",
@@ -11,18 +11,16 @@ const faqs = [
   },
   {
     question: "What kind of music plays on Desi Mahol?",
-    answer:
-      "Old, evergreen Hindi songs organised into moods — Happy, Sad, Love, Travel, Driving, Working, Cooking, Relax and Mix — so you can pick whatever fits the moment.",
+    answer: "Old, evergreen Hindi songs organised into categories, so you can pick whatever fits the moment.",
   },
   {
-    question: "How does the rotation work?",
-    answer:
-      "Tap to Tune In and the mood \"on air\" changes automatically with the time of day (IST) — a different one plays through mornings, afternoons, evenings and late night.",
+    question: "What happens when I tap \"Tune In\"?",
+    answer: "It starts a shuffled mix of every song on the site — no setup needed.",
   },
   {
-    question: "Can I pick a specific mood or playlist?",
+    question: "Can I pick a specific category or playlist?",
     answer:
-      "Yes. Use the Mood button to pick a specific vibe, or the Playlists button to shuffle every song on the site.",
+      "Yes. Use the Category button to pick a specific vibe, or the All Songs button to shuffle every song on the site.",
   },
 ];
 

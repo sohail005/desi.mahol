@@ -1,19 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { useThemeContext } from "@/context/ThemeContext";
 
 const DEFAULT_IMAGE = "/images/desimahol3.webp";
 
 export default function AmbientBackground() {
-  const { activeTheme } = useThemeContext();
-  const imageSrc = activeTheme?.imageDesktop ?? DEFAULT_IMAGE;
-
   return (
     <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
       <Image
-        key={imageSrc}
-        src={imageSrc}
+        src={DEFAULT_IMAGE}
         alt=""
         fill
         sizes="100vw"

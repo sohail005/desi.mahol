@@ -9,9 +9,9 @@ const features = [
   },
   {
     icon: Clock,
-    title: "Daily Rotations",
+    title: "Shuffled All Day",
     description:
-      "A different mood for every part of the day — mornings, afternoons, evenings and late night — each with its own running rotation.",
+      "Tap in and every song on the site shuffles into a nonstop mix — or pick a category if you want a specific vibe.",
   },
   {
     icon: InfinityIcon,
@@ -34,9 +34,8 @@ export default function AboutSection() {
         <p className="mt-6 text-[16px] leading-relaxed text-white/70 sm:text-[18px]">
           Desi Mahol is a free ambient Hindi radio built to recreate one very specific
           feeling: an old shop radio left on in the background, playing timeless Hindi
-          songs while the day goes by. Press play, and Desi Mahol streams a nonstop mix
-          of old Bollywood nostalgia, organised into rotations that shift with the time
-          of day.
+          songs while the day goes by. Press play, and Desi Mahol streams a nonstop,
+          shuffled mix of old Bollywood nostalgia.
         </p>
       </div>
 

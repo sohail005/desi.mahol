@@ -73,6 +73,7 @@ function mapSongDoc(id: string, data: Record<string, unknown>): Song {
     categoryId: String(data.categoryId ?? ""),
     categoryName: String(data.categoryName ?? ""),
     audioPath: String(data.audioPath ?? ""),
+    thumbnailPath: typeof data.thumbnailPath === "string" ? data.thumbnailPath : null,
     duration: typeof data.duration === "number" ? data.duration : null,
     createdAt: toEpochMs(data.createdAt),
     createdBy: String(data.createdBy ?? ""),
@@ -101,6 +102,14 @@ export async function fetchSongAudio(audioPath: string): Promise<string> {
   const value = snapshot.val() as { data?: string; contentType?: string } | null;
   if (!value?.data) throw new Error("This song's audio file is missing.");
   return `data:${value.contentType || "audio/mpeg"};base64,${value.data}`;
+}
+
+/** Resolves a song's `thumbnailPath` to a displayable data: URI. */
+export async function fetchSongThumbnail(thumbnailPath: string): Promise<string | null> {
+  const snapshot = await get(dbRef(rtdb, thumbnailPath));
+  const value = snapshot.val() as { data?: string; contentType?: string } | null;
+  if (!value?.data) return null;
+  return `data:${value.contentType || "image/jpeg"};base64,${value.data}`;
 }
 
 /** Reads an audio file's duration in seconds by loading it into a throwaway <audio> element. */
@@ -133,6 +142,100 @@ function fileToBase64(file: File): Promise<string> {
     reader.onerror = () => reject(reader.error ?? new Error("Failed to read file."));
     reader.readAsDataURL(file);
   });
+}
+
+function bytesToBase64(bytes: Uint8Array): string {
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+
+/** De-syncsafes a 4-byte ID3v2 size field (each byte only uses its low 7 bits). */
+function readSyncsafeInt(view: DataView, offset: number): number {
+  return (
+    ((view.getUint8(offset) & 0x7f) << 21) |
+    ((view.getUint8(offset + 1) & 0x7f) << 14) |
+    ((view.getUint8(offset + 2) & 0x7f) << 7) |
+    (view.getUint8(offset + 3) & 0x7f)
+  );
+}
+
+interface EmbeddedCoverArt {
+  data: string; // base64
+  contentType: string;
+}
+
+/**
+ * Pulls the embedded cover art (ID3v2 APIC frame) out of an MP3 file, if
+ * present. Only reads the ID3v2 header block, not the whole file.
+ */
+async function extractEmbeddedCoverArt(file: File): Promise<EmbeddedCoverArt | null> {
+  try {
+    const headerBuffer = await file.slice(0, 10).arrayBuffer();
+    const header = new DataView(headerBuffer);
+    const isId3 =
+      header.getUint8(0) === 0x49 && header.getUint8(1) === 0x44 && header.getUint8(2) === 0x33;
+    if (!isId3) return null;
+
+    const majorVersion = header.getUint8(3);
+    const tagSize = readSyncsafeInt(header, 6);
+    if (tagSize <= 0) return null;
+
+    const tagBuffer = await file.slice(10, 10 + tagSize).arrayBuffer();
+    const view = new DataView(tagBuffer);
+    const bytes = new Uint8Array(tagBuffer);
+
+    let offset = 0;
+    while (offset + 10 <= tagBuffer.byteLength) {
+      const frameId = String.fromCharCode(
+        view.getUint8(offset),
+        view.getUint8(offset + 1),
+        view.getUint8(offset + 2),
+        view.getUint8(offset + 3)
+      );
+      if (frameId === "\0\0\0\0") break;
+
+      const frameSize =
+        majorVersion >= 4
+          ? readSyncsafeInt(view, offset + 4)
+          : view.getUint32(offset + 4, false);
+      const frameStart = offset + 10;
+
+      if (frameId === "APIC" && frameSize > 0 && frameStart + frameSize <= tagBuffer.byteLength) {
+        const frame = bytes.subarray(frameStart, frameStart + frameSize);
+        const encoding = frame[0];
+        let cursor = 1;
+        let mimeEnd = cursor;
+        while (mimeEnd < frame.length && frame[mimeEnd] !== 0) mimeEnd++;
+        const mimeType = new TextDecoder("latin1").decode(frame.subarray(cursor, mimeEnd)) || "image/jpeg";
+        cursor = mimeEnd + 1;
+        cursor += 1; // picture type byte
+
+        const isUtf16 = encoding === 1 || encoding === 2;
+        if (isUtf16) {
+          while (cursor + 1 < frame.length && !(frame[cursor] === 0 && frame[cursor + 1] === 0)) {
+            cursor += 2;
+          }
+          cursor += 2;
+        } else {
+          while (cursor < frame.length && frame[cursor] !== 0) cursor++;
+          cursor += 1;
+        }
+
+        const imageBytes = frame.subarray(Math.min(cursor, frame.length));
+        if (imageBytes.length === 0) return null;
+        return { data: bytesToBase64(imageBytes), contentType: mimeType };
+      }
+
+      offset = frameStart + frameSize;
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 interface UploadSongInput {
@@ -168,14 +271,24 @@ export async function uploadSong({
   const songRef = doc(collection(db, "songs"));
   const songId = songRef.id;
   const audioPath = `songsAudio/${songId}`;
+  const thumbnailPath = `songsThumbnails/${songId}`;
 
   onProgress?.(10);
   const duration = await readAudioDuration(file);
-  onProgress?.(30);
+  onProgress?.(25);
+  const coverArt = await extractEmbeddedCoverArt(file);
+  onProgress?.(35);
   const base64Data = await fileToBase64(file);
   onProgress?.(60);
 
   await dbSet(dbRef(rtdb, audioPath), { data: base64Data, contentType: file.type });
+  onProgress?.(80);
+
+  if (coverArt) {
+    await dbSet(dbRef(rtdb, thumbnailPath), coverArt).catch(() => {
+      // Cover art is a nice-to-have — don't fail the whole upload over it.
+    });
+  }
   onProgress?.(90);
 
   try {
@@ -186,6 +299,7 @@ export async function uploadSong({
       categoryId,
       categoryName,
       audioPath,
+      thumbnailPath: coverArt ? thumbnailPath : null,
       duration,
       createdAt: serverTimestamp(),
       createdBy: currentUser.email,
@@ -195,16 +309,24 @@ export async function uploadSong({
     return { ...song, createdAt: Date.now() };
   } catch (error) {
     // Firestore write failed after the audio made it to Realtime Database
-    // — clean up the orphaned entry rather than leaving it unreferenced.
+    // — clean up the orphaned entries rather than leaving them unreferenced.
     await dbRemove(dbRef(rtdb, audioPath)).catch(() => {});
+    if (coverArt) await dbRemove(dbRef(rtdb, thumbnailPath)).catch(() => {});
     throw error;
   }
 }
 
-export async function deleteSong(songId: string, audioPath: string): Promise<void> {
+export async function deleteSong(
+  songId: string,
+  audioPath: string,
+  thumbnailPath?: string | null
+): Promise<void> {
   await deleteDoc(doc(db, "songs", songId));
   await dbRemove(dbRef(rtdb, audioPath)).catch(() => {
     // Entry already gone / never finished uploading — the metadata delete
     // above is what matters for the app; ignore.
   });
+  if (thumbnailPath) {
+    await dbRemove(dbRef(rtdb, thumbnailPath)).catch(() => {});
+  }
 }

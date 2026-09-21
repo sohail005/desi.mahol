@@ -10,8 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import type { Song } from "@/types/music";
-import { fetchSongAudio, fetchSongsByCategory } from "@/lib/firebase/songs";
-import { getCurrentCategoryId, getRadioStartingPosition } from "@/lib/rotation";
+import { fetchAllSongsOnce, fetchSongAudio } from "@/lib/firebase/songs";
 import NativeAudioPlayer, {
   type NativeAudioPlayerHandle,
 } from "@/components/player/NativeAudioPlayer";
@@ -25,6 +24,15 @@ const STORAGE_KEYS = {
 } as const;
 
 const DEFAULT_VOLUME = 80;
+
+function shuffle<T>(items: T[]): T[] {
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
 
 export interface CurrentCategory {
   id: string;
@@ -136,14 +144,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const tuneIn = useCallback(async () => {
     setHasTunedIn(true);
     try {
-      const categoryId = getCurrentCategoryId();
-      const songs = await fetchSongsByCategory(categoryId);
+      const songs = await fetchAllSongsOnce();
       if (songs.length === 0) {
         setPlaybackUnavailable(true);
         return;
       }
-      const startIndex = getRadioStartingPosition(songs.length);
-      playQueue(songs, { id: categoryId, name: songs[0].categoryName || categoryId }, startIndex);
+      playQueue(shuffle(songs), null);
     } catch {
       setPlaybackUnavailable(true);
     }
@@ -241,18 +247,17 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         // Corrupt/incompatible saved state — fall through to a fresh tune-in.
       }
 
-      // Nothing usable saved (first-ever visit) — cue up the current
-      // rotation so the player bar shows up ready to go instead of a bare
-      // "tune in" prompt. Cueing doesn't need a user gesture; only
-      // play() does, which the visible Play button provides.
+      // Nothing usable saved (first-ever visit) — cue up all songs shuffled
+      // so the player bar shows up ready to go instead of a bare "tune in"
+      // prompt. Cueing doesn't need a user gesture; only play() does, which
+      // the visible Play button provides.
       try {
-        const categoryId = getCurrentCategoryId();
-        const songs = await fetchSongsByCategory(categoryId);
+        const songs = await fetchAllSongsOnce();
         if (songs.length > 0) {
-          const startIndex = getRadioStartingPosition(songs.length);
-          setQueue(songs);
-          setCurrentCategory({ id: categoryId, name: songs[0].categoryName || categoryId });
-          goToIndex(songs, startIndex, false);
+          const shuffled = shuffle(songs);
+          setQueue(shuffled);
+          setCurrentCategory(null);
+          goToIndex(shuffled, 0, false);
         }
       } catch {
         // Network error on first load — leave the "Tap to Tune In" prompt

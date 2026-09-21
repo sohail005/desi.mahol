@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Lock } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 
@@ -92,6 +93,13 @@ export default function AdminLoginPage() {
         >
           {isSubmitting ? "Signing in…" : "Sign in"}
         </button>
+
+        <Link
+          href="/"
+          className="liquid-glass mt-3 block w-full rounded-xl py-3 text-center text-sm font-semibold text-white sm:py-2.5"
+        >
+          User Mode
+        </Link>
       </form>
     </div>
   );

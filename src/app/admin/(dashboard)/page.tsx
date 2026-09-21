@@ -67,7 +67,7 @@ export default function AdminDashboardPage() {
 
   async function handleDeleteSong(song: Song) {
     try {
-      await deleteSongRequest(song.id, song.audioPath);
+      await deleteSongRequest(song.id, song.audioPath, song.thumbnailPath);
       setSongs((prev) => prev.filter((s) => s.id !== song.id));
       showToast(`"${song.title}" deleted.`, "success");
     } catch {
