@@ -18,6 +18,12 @@
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any"
+    },
+    {
+      "src": "/icons/desi-mahol-icon.jpg",
+      "sizes": "1264x1264",
+      "type": "image/jpeg",
+      "purpose": "any"
     }
   ]
 }

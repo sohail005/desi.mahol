@@ -19,7 +19,15 @@
       "Bash(cat next.config.mjs)",
       "Bash(npx next *)",
       "Bash(python3 -c \"import json; json.load\\(open\\('database.rules.json'\\)\\); print\\('database.rules.json: valid JSON'\\)\")",
-      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('database.rules.json','utf8'\\)\\); console.log\\('database.rules.json: valid JSON'\\)\")"
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('database.rules.json','utf8'\\)\\); console.log\\('database.rules.json: valid JSON'\\)\")",
+      "Bash(node -e \"require.resolve\\('sharp'\\)\")",
+      "Bash(convert \"public/images/text-its-not-visible-properly.jpg\" -format \"%wx%h\" info:)",
+      "Bash(where magick *)",
+      "Bash(where convert.exe)",
+      "Bash(powershell -Command \"Get-Command magick -ErrorAction SilentlyContinue\")",
+      "Bash(cat public/manifest.webmanifest)",
+      "Bash(ls public/icons)",
+      "Bash(node -e ' *)"
     ]
   }
 }
