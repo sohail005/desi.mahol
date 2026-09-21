@@ -22,8 +22,7 @@ export default function CategoryManager({
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  async function handleCreate(event: React.FormEvent) {
-    event.preventDefault();
+  async function handleCreate() {
     setError(null);
     setIsSaving(true);
     try {
@@ -70,8 +69,7 @@ export default function CategoryManager({
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
           onClick={() => setIsModalOpen(false)}
         >
-          <form
-            onSubmit={handleCreate}
+          <div
             onClick={(event) => event.stopPropagation()}
             className="liquid-glass-card relative w-full max-w-xs rounded-2xl p-5 text-white"
           >
@@ -90,18 +88,25 @@ export default function CategoryManager({
               autoFocus
               value={name}
               onChange={(event) => setName(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  handleCreate();
+                }
+              }}
               placeholder="e.g. Happy"
               className="mb-3 w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-amber-400/60"
             />
             {error && <p className="mb-3 text-xs text-red-400">{error}</p>}
             <button
-              type="submit"
+              type="button"
+              onClick={handleCreate}
               disabled={isSaving}
               className="liquid-glass liquid-glass-accent w-full rounded-xl py-2 text-sm font-semibold disabled:opacity-60"
             >
               {isSaving ? "Creating…" : "Create"}
             </button>
-          </form>
+          </div>
         </div>
       )}
     </div>
