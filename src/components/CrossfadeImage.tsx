@@ -38,11 +38,13 @@ export default function CrossfadeImage({
   }, [targetSrc]);
 
   return (
+    // key={displaySrc} restarts the Ken Burns animation fresh for every new image.
     // eslint-disable-next-line @next/next/no-img-element -- remote, dynamically-seeded URL; not a static/optimizable asset
     <img
+      key={displaySrc}
       src={displaySrc}
       alt={alt}
-      className={`transition-opacity duration-700 ${className}`}
+      className={`animate-ken-burns transition-opacity duration-700 ${className}`}
     />
   );
 }

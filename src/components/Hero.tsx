@@ -10,7 +10,7 @@ import InstallAppButton from "@/components/InstallAppButton";
 import PlaylistSelector from "@/components/PlaylistSelector";
 import RadioPlayer from "@/components/player/RadioPlayer";
 import CrossfadeImage from "@/components/CrossfadeImage";
-import TrueFocus from "@/components/TrueFocus";
+import MaskedHeading from "@/components/MaskedHeading";
 
 const DEFAULT_OVERLAY = "linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.8) 100%)";
 const DEFAULT_DESKTOP_IMAGE = "/images/desimahol3.webp";
@@ -60,13 +60,13 @@ export default function Hero() {
         targetSrc={desktopBgTarget}
         fallbackSrc={DEFAULT_DESKTOP_IMAGE}
         alt="Desi Mahol — nostalgic Hindi radio"
-        className="absolute inset-0 hidden h-full w-full object-cover sm:block"
+        className="absolute inset-0 hidden h-full w-full object-cover opacity-60 sm:block"
       />
       <CrossfadeImage
         targetSrc={mobileBgTarget}
         fallbackSrc={DEFAULT_MOBILE_IMAGE}
         alt="Desi Mahol — nostalgic Hindi radio"
-        className="absolute inset-0 h-full w-full object-cover sm:hidden"
+        className="absolute inset-0 h-full w-full object-cover opacity-60 sm:hidden"
       />
       <div
         className="absolute inset-0"
@@ -147,15 +147,19 @@ export default function Hero() {
 
       <div className="relative z-10 flex flex-1 flex-col px-4 text-center sm:mt-30 sm:px-6">
         <div className="liquid-glass-card mx-auto flex flex-col rounded-2xl px-5 py-4 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:shadow-none sm:backdrop-blur-none">
-          <TrueFocus
-            sentence="Desi Mahol"
-            manualMode={false}
-            blurAmount={4}
-            borderColor="var(--accent)"
-            glowColor="color-mix(in srgb, var(--accent) 60%, transparent)"
-            animationDuration={0.6}
-            pauseBetweenAnimations={1.2}
-            className="font-devanagari text-4xl leading-none font-bold text-white drop-shadow-lg sm:text-8xl"
+          <MaskedHeading
+            text="Desi Mahol"
+            tag="h1"
+            mediaType="image"
+            src={DEFAULT_DESKTOP_IMAGE}
+            reveal="rise"
+            trigger="view"
+            align="center"
+            weight={700}
+            brightness={1.8}
+            saturation={1.2}
+            textScale={0.3}
+            className="font-devanagari drop-shadow-lg"
           />
           <p className="mt-4 text-xs tracking-[0.2em] text-white/80 uppercase sm:tracking-[0.3em] sm:text-sm">
             Old songs · pure desi vibes · playing all day
