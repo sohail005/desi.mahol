@@ -25,7 +25,7 @@ export default function PlayerProgress() {
         onChange={handleSeek}
         disabled={!currentSong || duration === 0}
         aria-label="Seek"
-        className="desi-progress h-1 w-full flex-1 cursor-pointer appearance-none rounded-full bg-white/20 accent-[var(--accent)] disabled:cursor-default"
+        className="desi-progress h-2 w-full flex-1 cursor-pointer appearance-none rounded-full bg-white/20 accent-[var(--accent)] disabled:cursor-default"
         style={{
           background: `linear-gradient(to right, var(--accent) ${pct}%, rgba(255,255,255,0.2) ${pct}%)`,
         }}

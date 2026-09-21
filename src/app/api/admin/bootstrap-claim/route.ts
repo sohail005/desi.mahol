@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase/admin";
+import { getClientIp, isRateLimited } from "@/lib/rateLimit";
+
+const RATE_LIMIT = 10;
+const RATE_LIMIT_WINDOW_MS = 60_000;
 
 /**
  * The only server route in the admin auth flow. The client sends its
@@ -11,6 +15,11 @@ import { getAdminAuth } from "@/lib/firebase/admin";
  * claim, not by additional routes here.
  */
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+  if (isRateLimited(`bootstrap-claim:${ip}`, RATE_LIMIT, RATE_LIMIT_WINDOW_MS)) {
+    return NextResponse.json({ error: "Too many requests." }, { status: 429 });
+  }
+
   const authHeader = request.headers.get("authorization") ?? "";
   const idToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
   if (!idToken) {

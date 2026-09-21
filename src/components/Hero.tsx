@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronDown, Heart, Menu, X } from "lucide-react";
+import { ChevronDown, HelpCircle, Heart, Info, Menu, X } from "lucide-react";
 import { formatISTClock } from "@/lib/time";
 import { useOnlineCount } from "@/hooks/useOnlineCount";
 import { useRadio } from "@/hooks/useRadio";
@@ -85,10 +85,12 @@ export default function Hero() {
         </div>
 
         <nav className="col-start-2 flex flex-nowrap items-center justify-center gap-1.5 justify-self-center text-xs sm:flex-wrap sm:gap-2 sm:text-sm">
-          <a href="#about" className={GLASS_LINK_DESKTOP_ONLY}>
+          <a href="#about" className={`${GLASS_LINK_DESKTOP_ONLY} gap-1.5`}>
+            <Info size={14} />
             About
           </a>
-          <a href="#faq" className={GLASS_LINK_DESKTOP_ONLY}>
+          <a href="#faq" className={`${GLASS_LINK_DESKTOP_ONLY} gap-1.5`}>
+            <HelpCircle size={14} />
             FAQ
           </a>
           <InstallAppButton className={`${GLASS_LINK_DESKTOP_ONLY} gap-1.5`} />
@@ -156,21 +158,22 @@ export default function Hero() {
             trigger="view"
             align="center"
             weight={700}
+            lineHeight={1.5}
             brightness={1.8}
             saturation={1.2}
             textScale={0.3}
             className="font-devanagari drop-shadow-lg"
           />
-          <p className="mt-4 text-xs tracking-[0.2em] text-white/80 uppercase sm:tracking-[0.3em] sm:text-sm">
-            Old songs · pure desi vibes · playing all day
+          <p className="mt-4 text-xs tracking-wider text-white/80 sm:text-sm">
+            Old songs · Pure desi vibes · Playing all day
           </p>
         </div>
       </div>
 
       <div className="relative z-10 flex flex-col items-center gap-4 px-4 pb-8 sm:pb-10">
-        <span className="hidden flex-col items-center gap-1 text-[10px] tracking-[0.3em] text-white/60 uppercase sm:flex">
+        <span className="hidden flex-col items-center gap-1.5 text-xs tracking-[0.3em] text-white/90 uppercase drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] sm:flex">
           Scroll
-          <ChevronDown size={14} className="animate-bounce" />
+          <ChevronDown size={18} className="animate-bounce drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]" />
         </span>
       </div>
 

@@ -90,6 +90,19 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer;
 }
 
+/* Seek bar: bigger thumb than the default range-input styling above, so
+   the draggable handle is an easier touch target (WCAG 2.5.5-friendly)
+   without making the track itself visually heavy. */
+.desi-progress::-webkit-slider-thumb {
+  width: 16px;
+  height: 16px;
+}
+
+.desi-progress::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+}
+
 .faq-item[open] summary .faq-chevron {
   transform: rotate(180deg);
 }

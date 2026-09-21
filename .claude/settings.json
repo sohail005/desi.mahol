@@ -17,7 +17,9 @@
       "Bash(cat next.config.ts)",
       "Bash(cat next.config.js)",
       "Bash(cat next.config.mjs)",
-      "Bash(npx next *)"
+      "Bash(npx next *)",
+      "Bash(python3 -c \"import json; json.load\\(open\\('database.rules.json'\\)\\); print\\('database.rules.json: valid JSON'\\)\")",
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('database.rules.json','utf8'\\)\\); console.log\\('database.rules.json: valid JSON'\\)\")"
     ]
   }
 }

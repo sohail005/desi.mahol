@@ -25,14 +25,14 @@ export default function PlayerControls() {
         onClick={togglePlay}
         disabled={disabled}
         aria-label={isPlaying ? "Pause" : "Play"}
-        className="liquid-glass liquid-glass-accent flex h-10 w-10 items-center justify-center rounded-full text-white disabled:opacity-40"
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-accent text-background shadow-lg shadow-black/30 transition hover:bg-accent-dark active:scale-95 disabled:opacity-40"
       >
         {isLoading ? (
-          <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
         ) : isPlaying ? (
-          <Pause size={18} fill="currentColor" />
+          <Pause size={24} fill="currentColor" />
         ) : (
-          <Play size={18} fill="currentColor" className="ml-0.5" />
+          <Play size={24} fill="currentColor" className="ml-0.5" />
         )}
       </button>
 
